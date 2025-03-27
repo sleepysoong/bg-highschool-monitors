@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>학교 모니터 배치도 v16 (스타일 최종)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+      @font-face {
+        font-family: 'Freesentation-9Black';
+        src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-9Black.woff2') format('woff2');
+        font-weight: 900;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: 'Pretendard-Regular';
+        src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      body {
+        font-family: 'Pretendard-Regular', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+        background-color: #F8F9FA;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 60px 20px 20px 20px;
+        color: #333;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        overflow-x: hidden;
+      }
+
+      #button-container {
+        position: fixed;
+        top: 15px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        gap: 10px;
+      }
+
+      .icon-button {
+        padding: 8px 12px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: #007AFF;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .icon-button span {
+        letter-spacing: -0.05em;
+      }
+
+      .icon-button:hover {
+        background-color: #005ECB;
+      }
+
+      .icon-button:disabled {
+        background-color: #BDBDBD;
+        cursor: not-allowed;
+      }
+
+      .icon-button svg {
+        width: 1em;
+        height: 1em;
+        fill: currentColor;
+      }
+
+      #pdf-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        color: white;
+        font-size: 1.5em;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        text-align: center;
+      }
+
+      #pdf-overlay.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .floor-plan {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+        width: fit-content;
+        margin-top: 10px;
+        transform-origin: center top;
+        transition: transform 0.3s ease;
+      }
+
+      .floor-section {
+        width: fit-content;
+        background-color: #F8F9FA;
+        padding: 22px;
+        /* 여백 증가 */
+        border-radius: 8px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        /* 그림자 강화 */
+        margin-bottom: 10px;
+      }
+
+      .section-divider {
+        border: none;
+        height: 1px;
+        background-color: #DEE2E6;
+        width: 100%;
+        max-width: calc(100px * 9 + 3px * 8 + 6px);
+        margin: 30px 0;
+      }
+
+      /* PDF 출력용 임시 스타일 */
+      .pdf-capture-mode .floor-section {
+        background-color: #FFFFFF !important;
+        box-shadow: none !important;
+        padding: 5px !important;
+        border: none !important;
+      }
+
+      .pdf-capture-mode .grid-container {
+        background-color: #FFFFFF !important;
+        border-color: #CCCCCC !important;
+        gap: 2px !important;
+        padding: 2px !important;
+      }
+
+      .pdf-capture-mode .cube {
+        background-color: #F0F2F5 !important;
+        border: 1px solid #CCCCCC !important;
+      }
+
+      .pdf-capture-mode .corridor {
+        background-color: #FFFFFF !important;
+        border: 1px dashed #DDDDDD !important;
+      }
+
+      .pdf-capture-mode .monitor-cube {
+        background-color: #D8DCE0 !important;
+        border-color: #BBBBBB !important;
+      }
+
+      .pdf-capture-mode .section-divider {
+        display: none !important;
+      }
+
+      .pdf-capture-mode .section-label {
+        color: #333333 !important;
+        font-family: 'Freesentation-9Black', sans-serif !important;
+      }
+
+      .pdf-capture-mode body,
+      .pdf-capture-mode .cube,
+      .pdf-capture-mode .icon-button {
+        font-family: 'Pretendard-Regular', sans-serif !important;
+      }
+
+      .pdf-capture-mode .cube-name-text {
+        font-weight: 600 !important;
+      }
+
+      .pdf-capture-mode .cube,
+      .pdf-capture-mode .monitor-cube {
+        letter-spacing: -0.05em !important;
+      }
+
+      .section-label {
+        font-family: 'Freesentation-9Black', sans-serif;
+        font-size: 24px;
+        font-weight: 900;
+        margin-bottom: 15px;
+        text-align: center;
+        color: #555;
+      }
+
+      .grid-container {
+        display: grid;
+        gap: 3px;
+        border: 1px solid #E0E0E0;
+        border-radius: 8px;
+        background-color: #E0E0E0;
+        padding: 3px;
+        overflow: hidden;
+        grid-auto-rows: minmax(60px, auto);
+      }
+
+      .cube {
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        text-align: center;
+        font-size: 11px;
+        padding: 5px;
+        word-break: keep-all;
+        overflow-wrap: break-word;
+        overflow: hidden;
+        line-height: 1.3;
+        border-radius: 5px;
+        background-color: #FFFFFF;
+        border: 1px solid transparent;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+        min-height: 60px;
+        letter-spacing: -0.05em;
+      }
+
+      .cube-name {
+        margin-bottom: 4px;
+        width: 100%;
+      }
+
+      .cube-name-text {
+        font-weight: 600;
+      }
+
+      .corridor {
+        background-color: #F0F2F5;
+        border-color: transparent;
+      }
+
+      .cube:not(.corridor):hover {
+        background-color: rgba(0, 122, 255, 0.08);
+        border-color: rgba(0, 122, 255, 0.5);
+      }
+
+      .monitor-list {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        width: 100%;
+        padding-top: 4px;
+      }
+
+      .monitor-cube {
+        box-sizing: border-box;
+        background-color: #E9ECEF;
+        border: 1px solid #DEE2E6;
+        border-radius: 4px;
+        padding: 4px;
+        font-size: 9.5px;
+        color: #495057;
+        width: 100%;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        letter-spacing: -0.05em;
+      }
+
+      .monitor-cube:hover {
+        background-color: rgba(0, 122, 255, 0.15);
+        border-color: rgba(0, 122, 255, 0.7);
+      }
+
+      .extra-cube-wrapper {
+        margin-top: 3px;
+      }
+
+      .extra-cube {
+        width: 100px;
+        margin-left: calc(100px * 2 + 3px * 2 + 6px);
+      }
+
+      #loading-message,
+      #error-message {
+        margin-top: 20px;
+        font-size: 16px;
+        color: #6c757d;
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-width: 80%;
+        text-align: center;
+        letter-spacing: -0.05em;
+      }
+
+      #error-message {
+        color: #dc3545;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="button-container">
+      <button class="icon-button" id="refreshButton" title="새로고침">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"></path>
+        </svg>
+        <span>새로고침</span>
+      </button>
+      <button class="icon-button" id="downloadButton" title="PDF 저장">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path>
+        </svg>
+        <span>PDF 저장</span>
+      </button>
+    </div>
+    <div id="pdf-overlay">
+      <span>PDF 생성 중...</span>
+    </div>
+    <div id="loading-message" style="display: none;">데이터 로딩 중...</div>
+    <div id="error-message" style="display: none;">데이터 로딩 실패.</div>
+    <div class="floor-plan" id="floorPlanContainer"></div>
+    <script>
+      const SHEET_ID = '1g--ydME6sFvsE44He1C4AO4uQRxwOtJm';
+      const SHEET_GID = '849721815';
+      const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
+      const COL_INDEX = {
+        INSTALL_STATUS: 0,
+        ID: 1,
+        CURRENT_INFO: 2,
+        CURRENT_LOCATION_NAME: 3,
+        PREVIOUS_LOCATION: 4,
+        NOTES: 5
+      };
+      const schoolLayout = [{
+        label: '5층',
+        columns: 9,
+        rooms: [{
+          name: '웅비관',
+          col: 1,
+          row: 1,
+          colSpan: 3
+        }, {
+          name: '3학년상담실',
+          col: 4,
+          row: 1
+        }, {
+          name: '푸르미르터3',
+          col: 6,
+          row: 1,
+          colSpan: 2
+        }, {
+          name: '혜움터3',
+          col: 6,
+          row: 2
+        }, {
+          name: '서로나눔3',
+          col: 6,
+          row: 3
+        }, {
+          name: '교재연구실',
+          col: 6,
+          row: 4
+        }, {
+          name: '3-8',
+          col: 1,
+          row: 5
+        }, {
+          name: '3-7',
+          col: 2,
+          row: 5
+        }, {
+          name: '3-6',
+          col: 3,
+          row: 5
+        }, {
+          name: '3-5',
+          col: 4,
+          row: 5
+        }, {
+          name: '3학년연구실',
+          col: 5,
+          row: 5
+        }, {
+          name: '3-4',
+          col: 6,
+          row: 5
+        }, {
+          name: '3-3',
+          col: 7,
+          row: 5
+        }, {
+          name: '3-2',
+          col: 8,
+          row: 5
+        }, {
+          name: '3-1',
+          col: 9,
+          row: 5
+        }],
+        corridors: [{
+          col: 5,
+          row: 1
+        }, {
+          col: 5,
+          row: 2
+        }, {
+          col: 5,
+          row: 3
+        }, {
+          col: 5,
+          row: 4
+        }]
+      }, {
+        label: '4층',
+        columns: 9,
+        rooms: [{
+          name: 'AI융합ON',
+          col: 1,
+          row: 1
+        }, {
+          name: '여교직원휴게실',
+          col: 2,
+          row: 1
+        }, {
+          name: '학생자치실',
+          col: 3,
+          row: 1
+        }, {
+          name: '2학년상담실',
+          col: 4,
+          row: 1
+        }, {
+          name: '푸르미르터2',
+          col: 6,
+          row: 1,
+          colSpan: 2
+        }, {
+          name: '혜움터2',
+          col: 6,
+          row: 2
+        }, {
+          name: '서로나눔2',
+          col: 6,
+          row: 3
+        }, {
+          name: '사회과교실',
+          col: 1,
+          row: 5
+        }, {
+          name: '2-7',
+          col: 2,
+          row: 5
+        }, {
+          name: '2-6',
+          col: 3,
+          row: 5
+        }, {
+          name: '2-5',
+          col: 4,
+          row: 5
+        }, {
+          name: '2학년연구실',
+          col: 5,
+          row: 5
+        }, {
+          name: '2-4',
+          col: 6,
+          row: 5
+        }, {
+          name: '2-3',
+          col: 7,
+          row: 5
+        }, {
+          name: '2-2',
+          col: 8,
+          row: 5
+        }, {
+          name: '2-1',
+          col: 9,
+          row: 5
+        }],
+        corridors: [{
+          col: 5,
+          row: 1
+        }, {
+          col: 5,
+          row: 2
+        }, {
+          col: 5,
+          row: 3
+        }, {
+          col: 5,
+          row: 4
+        }, {
+          col: 6,
+          row: 4
+        }]
+      }, {
+        label: '3층',
+        columns: 9,
+        rooms: [{
+          name: '나눔ON',
+          col: 1,
+          row: 1
+        }, {
+          name: '이룸ON',
+          col: 2,
+          row: 1
+        }, {
+          name: '진로진학부',
+          col: 3,
+          row: 1
+        }, {
+          name: '1학년상담실',
+          col: 4,
+          row: 1
+        }, {
+          name: '푸르미르터1',
+          col: 6,
+          row: 1,
+          colSpan: 2
+        }, {
+          name: '혜움터1',
+          col: 6,
+          row: 2
+        }, {
+          name: '서로나눔1',
+          col: 6,
+          row: 3
+        }, {
+          name: '부광마실',
+          col: 1,
+          row: 5
+        }, {
+          name: '1-7',
+          col: 2,
+          row: 5
+        }, {
+          name: '1-6',
+          col: 3,
+          row: 5
+        }, {
+          name: '1-5',
+          col: 4,
+          row: 5
+        }, {
+          name: '1학년연구실',
+          col: 5,
+          row: 5
+        }, {
+          name: '1-4',
+          col: 6,
+          row: 5
+        }, {
+          name: '1-3',
+          col: 7,
+          row: 5
+        }, {
+          name: '1-2',
+          col: 8,
+          row: 5
+        }, {
+          name: '1-1',
+          col: 9,
+          row: 5
+        }],
+        corridors: [{
+          col: 5,
+          row: 1
+        }, {
+          col: 5,
+          row: 2
+        }, {
+          col: 5,
+          row: 3
+        }, {
+          col: 5,
+          row: 4
+        }, {
+          col: 6,
+          row: 4
+        }]
+      }, {
+        label: '2층',
+        columns: 9,
+        rooms: [{
+          name: '지능형과학실',
+          col: 1,
+          row: 1,
+          colSpan: 2
+        }, {
+          name: '사이언스디자인랩',
+          col: 3,
+          row: 1,
+          colSpan: 2
+        }, {
+          name: '열림ON',
+          col: 6,
+          row: 1,
+          colSpan: 2
+        }, {
+          name: '창의ON',
+          col: 6,
+          row: 2
+        }, {
+          name: '서버실',
+          col: 6,
+          row: 3
+        }, {
+          name: '미디어실',
+          col: 1,
+          row: 5
+        }, {
+          name: '방송실',
+          col: 2,
+          row: 5
+        }, {
+          name: '소담소담',
+          col: 3,
+          row: 5
+        }, {
+          name: '리딩실',
+          col: 4,
+          row: 5
+        }, {
+          name: '본교무실',
+          col: 5,
+          row: 5
+        }, {
+          name: '교장실',
+          col: 6,
+          row: 5
+        }, {
+          name: '생활안전부',
+          col: 7,
+          row: 5
+        }, {
+          name: '통합교육지원실1',
+          col: 8,
+          row: 5
+        }, {
+          name: '위클래스',
+          col: 9,
+          row: 5
+        }],
+        corridors: [{
+          col: 5,
+          row: 1
+        }, {
+          col: 5,
+          row: 2
+        }, {
+          col: 5,
+          row: 3
+        }, {
+          col: 5,
+          row: 4
+        }, {
+          col: 6,
+          row: 4
+        }]
+      }, {
+        label: '1층',
+        columns: 9,
+        rooms: [{
+          name: '물리학실험실',
+          col: 1,
+          row: 1,
+          colSpan: 2
+        }, {
+          name: '사이언스라운지',
+          col: 3,
+          row: 1,
+          colSpan: 2
+        }, {
+          name: '생명화학실험실',
+          col: 6,
+          row: 1,
+          colSpan: 2
+        }, {
+          name: '비품실',
+          col: 6,
+          row: 2
+        }, {
+          name: '기계실',
+          col: 6,
+          row: 3
+        }, {
+          name: '샤워실',
+          col: 6,
+          row: 4
+        }, {
+          name: '보건실',
+          col: 1,
+          row: 5
+        }, {
+          name: '통합교육지원실2',
+          col: 2,
+          row: 5
+        }, {
+          name: '인쇄실',
+          col: 3,
+          row: 5
+        }, {
+          name: '행정실',
+          col: 4,
+          row: 5
+        }, {
+          name: '숙직실',
+          col: 6,
+          row: 5
+        }, {
+          name: '도서관',
+          col: 7,
+          row: 5,
+          colSpan: 3
+        }],
+        corridors: [{
+          col: 5,
+          row: 1
+        }, {
+          col: 5,
+          row: 2
+        }, {
+          col: 5,
+          row: 3
+        }, {
+          col: 5,
+          row: 4
+        }, {
+          col: 5,
+          row: 5
+        }]
+      }, {
+        label: '체육관',
+        columns: 3,
+        rooms: [{
+          name: '미술준비실',
+          col: 1,
+          row: 1
+        }, {
+          name: '음악실',
+          col: 3,
+          row: 1
+        }, {
+          name: '미술실',
+          col: 1,
+          row: 2
+        }, {
+          name: '체육교무부',
+          col: 3,
+          row: 2
+        }],
+        corridors: [{
+          col: 2,
+          row: 1
+        }, {
+          col: 2,
+          row: 2
+        }, {
+          col: 2,
+          row: 3
+        }],
+        extras: [{
+          name: '배움터지킴이실'
+        }]
+      }];
+      const floorPlanContainer = document.getElementById('floorPlanContainer');
+      const refreshButton = document.getElementById('refreshButton');
+      const downloadButton = document.getElementById('downloadButton');
+      const loadingMessage = document.getElementById('loading-message');
+      const errorMessage = document.getElementById('error-message');
+      const pdfOverlay = document.getElementById('pdf-overlay');
+      let validLocations = new Map();
+      const {
+        jsPDF
+      } = window.jspdf;
+      let resizeTimeout;
+
+      function buildValidLocations() {
+        validLocations = new Map();
+        schoolLayout.forEach(s => {
+          const p = s.label;
+          s.rooms?.forEach(r => validLocations.set(`${p} ${r.name}`, {
+            label: p,
+            name: r.name
+          }));
+          s.extras?.forEach(e => validLocations.set(`${p} ${e.name}`, {
+            label: p,
+            name: e.name
+          }));
+        });
+      }
+
+      function parseCSV(t) {
+        const l = t.trim().split('\n');
+        if (l.length < 1) return {
+          data: []
+        };
+        const d = l.slice(1).map(e => {
+          const r = [];
+          let c = '';
+          let i = false;
+          for (let n = 0; n < e.length; n++) {
+            const a = e[n];
+            if (a === '"' && (n === 0 || e[n - 1] !== '\\')) {
+              i = !i;
+            } else if (a === ',' && !i) {
+              r.push(c.trim().replace(/^"|"$/g, '').replace(/\\"/g, '"'));
+              c = '';
+            } else {
+              c += a;
+            }
+          }
+          r.push(c.trim().replace(/^"|"$/g, '').replace(/\\"/g, '"'));
+          return r;
+        });
+        return {
+          data: d
+        };
+      }
+      async function loadAndRenderLayout() {
+        refreshButton.disabled = true;
+        downloadButton.disabled = true;
+        loadingMessage.style.display = 'block';
+        errorMessage.style.display = 'none';
+        floorPlanContainer.innerHTML = '';
+        let m = [];
+        let mc = {};
+        let mbl = {};
+        let mcpf = {};
+        try {
+          const u = `${SHEET_CSV_URL}&_=${new Date().getTime()}`;
+          const r = await fetch(u);
+          if (!r.ok) throw new Error(`HTTP 오류! 상태: ${r.status}`);
+          const ct = await r.text();
+          const {
+            data: d
+          } = parseCSV(ct);
+          if (d.length === 0) console.warn("시트 데이터 없음.");
+          m = d.filter(rw => rw[COL_INDEX.INSTALL_STATUS]?.trim() === 'O').map(rw => {
+            const ci = rw[COL_INDEX.CURRENT_INFO] || '';
+            const p = ci.split('/');
+            const b = p[0]?.trim() || 'UB';
+            const f = p[1]?.trim() || 'UF';
+            return {
+              id: rw[COL_INDEX.ID] || 'N/A',
+              building: b,
+              floor: f,
+              current: rw[COL_INDEX.CURRENT_LOCATION_NAME] || 'UL',
+              previous: rw[COL_INDEX.PREVIOUS_LOCATION] || 'N/A',
+              notes: rw[COL_INDEX.NOTES] || ''
+            };
+          });
+          schoolLayout.forEach(s => {
+            mcpf[s.label] = 0;
+          });
+          m.forEach(mon => {
+            let cfl = null;
+            let cll = null;
+            for (const [fl, ld] of validLocations.entries()) {
+              if (ld.label === mon.floor && ld.name === mon.current) {
+                cfl = fl;
+                cll = ld.label;
+                break;
+              } else if (mon.building === '체육관' && ld.label === '체육관' && ld.name === mon.current) {
+                cfl = fl;
+                cll = ld.label;
+                break;
+              }
+            }
+            if (cfl && cll) {
+              mc[cfl] = (mc[cfl] || 0) + 1;
+              if (!mbl[cfl]) mbl[cfl] = [];
+              mbl[cfl].push(mon);
+              mcpf[cll] = (mcpf[cll] || 0) + 1;
+            }
+          });
+          renderLayout(mc, mbl, mcpf);
+          downloadButton.disabled = false;
+        } catch (e) {
+          console.error("데이터 오류:", e);
+          errorMessage.textContent = `데이터 오류:\n${e.message}`;
+          errorMessage.style.display = 'block';
+          downloadButton.disabled = true;
+        } finally {
+          loadingMessage.style.display = 'none';
+          refreshButton.disabled = false;
+          scaleLayout();
+        }
+      }
+
+      function createCube(d, ic = false, sl = '', mc, mbl) {
+        const cd = document.createElement('div');
+        cd.className = ic ? 'cube corridor' : 'cube';
+        cd.style.gridColumn = `${d.col} / span ${d.colSpan || 1}`;
+        cd.style.gridRow = `${d.row} / span ${d.rowSpan || 1}`;
+        cd.dataset.row = d.row;
+        if (!ic) {
+          const nd = document.createElement('div');
+          nd.className = 'cube-name';
+          const lk = `${sl} ${d.name}`;
+          const ct = mc[lk] || 0;
+          nd.innerHTML = `
+					<span class="cube-name-text">${d.name}</span> ${ct > 0 ? `(${ct})` : ''}`;
+          cd.appendChild(nd);
+          const mir = mbl[lk];
+          if (mir && mir.length > 0) {
+            const mld = document.createElement('div');
+            mld.className = 'monitor-list';
+            mir.forEach(mon => {
+              const mcdiv = document.createElement('div');
+              mcdiv.className = 'monitor-cube';
+              mcdiv.textContent = mon.id;
+              mcdiv.title = mon.id;
+              mcdiv.addEventListener('click', () => {
+                let pfl = mon.previous;
+                if (pfl && !['Storage', 'New', 'Temp-Room', 'N/A', ''].includes(pfl)) {
+                  let fp = false;
+                  for (const [fl, ld] of validLocations.entries()) {
+                    if (ld.name === pfl) {
+                      pfl = fl;
+                      fp = true;
+                      break;
+                    }
+                  }
+                }
+                let am = `모니터 정보\n--------------------\nID: ${mon.id}\n현재 위치: ${lk}\n이전 위치: ${pfl}`;
+                if (mon.notes) am += `\n비고: ${mon.notes}`;
+                alert(am);
+              });
+              mld.appendChild(mcdiv);
+            });
+            cd.appendChild(mld);
+          }
+        }
+        return cd;
+      }
+
+      function adjustRowHeights() {
+        requestAnimationFrame(() => {
+          const g = document.querySelectorAll('.grid-container');
+          g.forEach(gr => {
+            let mr = 0;
+            gr.querySelectorAll('.cube[data-row]').forEach(c => {
+              const rs = parseInt(c.dataset.row, 10) || 0;
+              mr = Math.max(mr, rs);
+            });
+            for (let r = 1; r <= mr; r++) {
+              let mh = 0;
+              const cir = [];
+              gr.querySelectorAll(`.cube[data-row="${r}"]`).forEach(c => {
+                c.style.minHeight = '60px';
+                mh = Math.max(mh, c.offsetHeight);
+                cir.push(c);
+              });
+              if (mh > 60) {
+                cir.forEach(c => {
+                  c.style.minHeight = `${mh}px`;
+                });
+              }
+            }
+          });
+        });
+      }
+
+      function renderLayout(mc, mbl, mcpf) {
+        floorPlanContainer.innerHTML = '';
+        schoolLayout.forEach((sd, i) => {
+          const sdiv = document.createElement('div');
+          const sid = `section-${sd.label.replace(/[^a-zA-Z0-9]/g, '') || i}`;
+          sdiv.id = sid;
+          sdiv.className = 'floor-section';
+          const ldiv = document.createElement('div');
+          ldiv.className = 'section-label';
+          let slt = sd.label;
+          const fmc = mcpf[sd.label] || 0;
+          if (fmc > 0) slt += ` (${fmc})`;
+          ldiv.textContent = slt;
+          sdiv.appendChild(ldiv);
+          const gdiv = document.createElement('div');
+          gdiv.className = 'grid-container';
+          gdiv.style.gridTemplateColumns = `repeat(${sd.columns}, 100px)`;
+          sd.rooms?.forEach(rd => {
+            gdiv.appendChild(createCube(rd, false, sd.label, mc, mbl));
+          });
+          sd.corridors?.forEach(cd => {
+            gdiv.appendChild(createCube(cd, true, sd.label, mc, mbl));
+          });
+          sdiv.appendChild(gdiv);
+          if (sd.extras && sd.extras.length > 0) {
+            const ew = document.createElement('div');
+            ew.className = 'extra-cube-wrapper';
+            sd.extras.forEach(ed => {
+              const ediv = document.createElement('div');
+              ediv.className = 'cube extra-cube';
+              const nd = document.createElement('div');
+              nd.className = 'cube-name';
+              const lk = `${sd.label} ${ed.name}`;
+              const ct = mc[lk] || 0;
+              nd.innerHTML = `
+					<span class="cube-name-text">${ed.name}</span> ${ct > 0 ? `(${ct})` : ''}`;
+              ediv.appendChild(nd);
+              const mie = mbl[lk];
+              if (mie && mie.length > 0) {
+                const mld = document.createElement('div');
+                mld.className = 'monitor-list';
+                mie.forEach(mon => {
+                  const mcdiv = document.createElement('div');
+                  mcdiv.className = 'monitor-cube';
+                  mcdiv.textContent = mon.id;
+                  mcdiv.title = mon.id;
+                  mcdiv.addEventListener('click', () => {
+                    let pfl = mon.previous;
+                    if (pfl && !['Storage', 'New', 'Temp-Room', 'N/A', ''].includes(pfl)) {
+                      let fp = false;
+                      for (const [fl, ld] of validLocations.entries()) {
+                        if (ld.name === pfl) {
+                          pfl = fl;
+                          fp = true;
+                          break;
+                        }
+                      }
+                    }
+                    let am = `모니터 정보\n--------------------\nID: ${mon.id}\n현재 위치: ${lk}\n이전 위치: ${pfl}`;
+                    if (mon.notes) am += `\n비고: ${mon.notes}`;
+                    alert(am);
+                  });
+                  mld.appendChild(mcdiv);
+                });
+                ediv.appendChild(mld);
+              }
+              ew.appendChild(ediv);
+            });
+            sdiv.appendChild(ew);
+          }
+          floorPlanContainer.appendChild(sdiv);
+          if (i < schoolLayout.length - 1) {
+            const dv = document.createElement('hr');
+            dv.className = 'section-divider';
+            floorPlanContainer.appendChild(dv);
+          }
+        });
+        adjustRowHeights();
+      }
+
+      function scaleLayout() {
+        const pe = floorPlanContainer;
+        if (!pe) return;
+        pe.style.transform = 'scale(1)';
+        const cw = pe.scrollWidth;
+        const ww = window.innerWidth;
+        const aw = ww - 40;
+        let s = 1;
+        if (cw > aw) {
+          s = aw / cw;
+        }
+        pe.style.transform = `scale(${s})`;
+      }
+
+      function debounce(f, w) {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(f, w);
+      }
+      async function generatePDF() {
+        downloadButton.disabled = true;
+        refreshButton.disabled = true;
+        pdfOverlay.querySelector('span').textContent = 'PDF 생성 중... (0%)';
+        pdfOverlay.classList.add('visible');
+        document.body.classList.add('pdf-capture-mode');
+        await new Promise(r => setTimeout(r, 100));
+        try {
+          const pdf = new jsPDF({
+            orientation: 'p',
+            unit: 'mm',
+            format: 'a4'
+          });
+          const pw = pdf.internal.pageSize.getWidth();
+          const ph = pdf.internal.pageSize.getHeight();
+          const m = 10;
+          const cw = pw - m * 2;
+          const ch = ph - m * 2;
+          const sg = 4;
+          const s = Array.from(document.querySelectorAll('.floor-section')).reverse();
+          let msf = 1.0;
+          const sc = [];
+          const sd = [];
+          for (let i = 0; i < s.length; i++) {
+            const sec = s[i];
+            const pr = Math.round(((i + 1) / s.length) * 50);
+            pdfOverlay.querySelector('span').textContent = `레이아웃 캡처 중... (${pr}%)`;
+            const can = await html2canvas(sec, {
+              scale: 3,
+              useCORS: true,
+              logging: false,
+              backgroundColor: null,
+              windowWidth: sec.scrollWidth,
+              windowHeight: sec.scrollHeight
+            });
+            sc.push(can);
+            const dim = {
+              width: can.width / 3,
+              height: can.height / 3
+            };
+            sd.push(dim);
+            const ws = cw / dim.width;
+            const hs = ch / dim.height;
+            msf = Math.min(msf, ws, hs);
+          }
+          let cphu = m;
+          let ifop = true; // cphu: Current Page Height Used, ifop: Is First On Page
+          for (let i = 0; i < sc.length; i++) {
+            const pr = 50 + Math.round(((i + 1) / sc.length) * 50);
+            pdfOverlay.querySelector('span').textContent = `PDF 페이지 생성 중... (${pr}%)`;
+            const can = sc[i];
+            const ow = sd[i].width;
+            const oh = sd[i].height;
+            const fiw = ow * msf;
+            const fih = oh * msf;
+            const rh = (ifop ? 0 : sg) + fih;
+            if (!ifop && (cphu + rh > ph - m)) {
+              pdf.addPage();
+              cphu = m;
+              ifop = true;
+            }
+            let py;
+            if (ifop) {
+              py = cphu;
+            } else {
+              const dy = cphu + sg / 2;
+              pdf.setDrawColor(222, 226, 230);
+              pdf.setLineWidth(0.3);
+              pdf.line(m, dy, m + cw, dy);
+              py = cphu + sg;
+            } // divider 추가 및 위치 조정
+            const px = m + (cw - fiw) / 2;
+            pdf.addImage(can.toDataURL('image/png'), 'PNG', px, py, fiw, fih);
+            cphu = py + fih;
+            ifop = false;
+          }
+          pdf.save('학교_배치도.pdf');
+        } catch (e) {
+          console.error("PDF 생성 오류:", e);
+          errorMessage.textContent = `PDF 생성 오류: ${e.message}`;
+          errorMessage.style.display = 'block';
+        } finally {
+          pdfOverlay.classList.remove('visible');
+          setTimeout(() => {
+            downloadButton.disabled = false;
+            refreshButton.disabled = false;
+          }, 300);
+          document.body.classList.remove('pdf-capture-mode');
+        }
+      }
+      refreshButton.addEventListener('click', loadAndRenderLayout);
+      downloadButton.addEventListener('click', generatePDF);
+      window.addEventListener('resize', () => debounce(scaleLayout, 250));
+      buildValidLocations();
+      loadAndRenderLayout();
+    </script>
+  </body>
+</html>
