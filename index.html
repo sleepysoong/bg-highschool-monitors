@@ -375,8 +375,7 @@
         Object.keys(groupedLostMonitors).sort().forEach(prevLocation => {
             const locationCube = document.createElement('div'); locationCube.className = 'lost-location-cube';
             const locationNameDiv = document.createElement('div'); locationNameDiv.className = 'lost-location-name';
-            // 사라짐 섹션의 이전 위치 표시 텍스트 변경
-            locationNameDiv.textContent = `[이전] ${prevLocation}`; // '[이전 위치]' -> '[이전]' 으로 축약
+            locationNameDiv.textContent = `[이전 위치] ${prevLocation}`;
             locationCube.appendChild(locationNameDiv);
             const monitorListDiv = document.createElement('div'); monitorListDiv.className = 'lost-monitor-list';
             groupedLostMonitors[prevLocation].forEach(monitor => { monitorListDiv.appendChild(createMonitorCube(monitor, '어디론가 사라짐')); });
