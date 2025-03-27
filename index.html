@@ -30,8 +30,6 @@
       .pdf-capture-mode .section-divider { display: none !important; }
       .pdf-capture-mode .section-label { color: #333333 !important; font-family: 'Freesentation-9Black', sans-serif !important; }
       .pdf-capture-mode body, .pdf-capture-mode .cube, .pdf-capture-mode .icon-button { font-family: 'Pretendard-Regular', sans-serif !important; }
-      /* PDF 기본 폰트 스타일 추가 */
-      .pdf-capture-mode.pdf-default-font body, .pdf-capture-mode.pdf-default-font .cube, .pdf-capture-mode.pdf-default-font .icon-button { font-family: sans-serif !important; }
       .pdf-capture-mode .cube-name-text { font-weight: 600 !important; }
       .pdf-capture-mode .cube, .pdf-capture-mode .monitor-cube { letter-spacing: -0.05em !important; }
       .pdf-capture-mode .lost-location-cube { background-color: #f8f9fa !important; border: 1px solid #dee2e6 !important; }
@@ -410,26 +408,15 @@
       }
 
       async function generatePDF() { /* PDF 파일 이름 수정 및 폰트 변경 로직 추가 */
+        if (!isDesktopChromeOrFirefox()) {
+          alert("데스크탑 환경의 Chrome 브라우저에서만 PDF 다운로드가 가능합니다.");
+          return; // PDF 생성 중단
+        }
+
         downloadButton.disabled = true; refreshButton.disabled = true;
         pdfOverlay.querySelector('span').textContent = 'PDF 생성 준비 중...';
         pdfOverlay.classList.add('visible');
         document.body.classList.add('pdf-capture-mode');
-
-        const useDefaultFont = !isDesktopChromeOrFirefox();
-        if (useDefaultFont) {
-          document.body.classList.add('pdf-default-font');
-          let alertMessage = '';
-          if (!(navigator.platform.toLowerCase().startsWith('win') || navigator.platform.toLowerCase().startsWith('mac'))) {
-            alertMessage = '데스크탑 환경이 아니여서 기본 폰트가 적용됩니다.';
-          } else if (!(navigator.userAgent.toLowerCase().includes('chrome') || navigator.userAgent.toLowerCase().includes('firefox'))) {
-            alertMessage = `${navigator.userAgent.split('/')[0]}이(가) 아니라서 기본 폰트가 적용됩니다. (Chrome 또는 Firefox 브라우저를 권장합니다)`;
-          } else {
-            alertMessage = '기본 폰트가 적용됩니다.'; // 혹시 모를 다른 케이스
-          }
-          alert(alertMessage);
-        } else {
-          document.body.classList.remove('pdf-default-font'); // 혹시라도 남아있을 수 있는 클래스 제거
-        }
 
 
         await new Promise(resolve => setTimeout(resolve, 100));
