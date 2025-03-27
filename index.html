@@ -2,8 +2,9 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>부광고등학교 모니터 조사</title>
+    <link rel="icon" href="bg.ico" type="image/x-icon">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -117,10 +118,8 @@
         width: fit-content;
         background-color: #F8F9FA;
         padding: 22px;
-        /* 여백 증가 */
         border-radius: 8px;
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-        /* 그림자 강화 */
         margin-bottom: 10px;
       }
 
@@ -278,15 +277,7 @@
         border-color: rgba(0, 122, 255, 0.7);
       }
 
-      .extra-cube-wrapper {
-        margin-top: 3px;
-      }
-
-      .extra-cube {
-        width: 100px;
-        margin-left: calc(100px * 2 + 3px * 2 + 6px);
-      }
-
+      /* extras 관련 CSS 제거 */
       #loading-message,
       #error-message {
         margin-top: 20px;
@@ -720,6 +711,10 @@
           col: 7,
           row: 5,
           colSpan: 3
+        }, {
+          name: '급식소',
+          col: 8,
+          row: 3
         }],
         corridors: [{
           col: 5,
@@ -756,6 +751,10 @@
           name: '체육교육부',
           col: 3,
           row: 2
+        }, {
+          name: '배움터지킴이실',
+          col: 3,
+          row: 3
         }],
         corridors: [{
           col: 2,
@@ -763,12 +762,6 @@
         }, {
           col: 2,
           row: 2
-        }, {
-          col: 2,
-          row: 3
-        }],
-        extras: [{
-          name: '배움터지킴이'
         }]
       }];
       const floorPlanContainer = document.getElementById('floorPlanContainer');
@@ -790,10 +783,6 @@
           s.rooms?.forEach(r => validLocations.set(`${p} ${r.name}`, {
             label: p,
             name: r.name
-          }));
-          s.extras?.forEach(e => validLocations.set(`${p} ${e.name}`, {
-            label: p,
-            name: e.name
           }));
         });
       }
@@ -865,11 +854,7 @@
             let cfl = null;
             let cll = null;
             for (const [fl, ld] of validLocations.entries()) {
-              if (ld.label === mon.floor && ld.name === mon.current) {
-                cfl = fl;
-                cll = ld.label;
-                break;
-              } else if (mon.building === '체육관' && ld.label === '체육관' && ld.name === mon.current) {
+              if ((ld.label === mon.floor && ld.name === mon.current) || (mon.building === '체육관' && ld.label === '체육관' && ld.name === mon.current)) {
                 cfl = fl;
                 cll = ld.label;
                 break;
@@ -908,7 +893,7 @@
           const lk = `${sl} ${d.name}`;
           const ct = mc[lk] || 0;
           nd.innerHTML = `
-					<span class="cube-name-text">${d.name}</span> ${ct > 0 ? `(${ct})` : ''}`;
+						<span class="cube-name-text">${d.name}</span> ${ct > 0 ? `(${ct})` : ''}`;
           cd.appendChild(nd);
           const mir = mbl[lk];
           if (mir && mir.length > 0) {
@@ -921,7 +906,7 @@
               mcdiv.title = mon.id;
               mcdiv.addEventListener('click', () => {
                 let pfl = mon.previous;
-                if (pfl && !['Storage', 'New', 'Temp-Room', 'N/A', ''].includes(pfl)) {
+                if (pfl && !['N/A', ''].includes(pfl)) {
                   let fp = false;
                   for (const [fl, ld] of validLocations.entries()) {
                     if (ld.name === pfl) {
@@ -993,53 +978,7 @@
           sd.corridors?.forEach(cd => {
             gdiv.appendChild(createCube(cd, true, sd.label, mc, mbl));
           });
-          sdiv.appendChild(gdiv);
-          if (sd.extras && sd.extras.length > 0) {
-            const ew = document.createElement('div');
-            ew.className = 'extra-cube-wrapper';
-            sd.extras.forEach(ed => {
-              const ediv = document.createElement('div');
-              ediv.className = 'cube extra-cube';
-              const nd = document.createElement('div');
-              nd.className = 'cube-name';
-              const lk = `${sd.label} ${ed.name}`;
-              const ct = mc[lk] || 0;
-              nd.innerHTML = `
-					<span class="cube-name-text">${ed.name}</span> ${ct > 0 ? `(${ct})` : ''}`;
-              ediv.appendChild(nd);
-              const mie = mbl[lk];
-              if (mie && mie.length > 0) {
-                const mld = document.createElement('div');
-                mld.className = 'monitor-list';
-                mie.forEach(mon => {
-                  const mcdiv = document.createElement('div');
-                  mcdiv.className = 'monitor-cube';
-                  mcdiv.textContent = mon.id;
-                  mcdiv.title = mon.id;
-                  mcdiv.addEventListener('click', () => {
-                    let pfl = mon.previous;
-                    if (pfl && !['Storage', 'New', 'Temp-Room', 'N/A', ''].includes(pfl)) {
-                      let fp = false;
-                      for (const [fl, ld] of validLocations.entries()) {
-                        if (ld.name === pfl) {
-                          pfl = fl;
-                          fp = true;
-                          break;
-                        }
-                      }
-                    }
-                    let am = `모니터 정보\n--------------------\nID: ${mon.id}\n현재 위치: ${lk}\n이전 위치: ${pfl}`;
-                    if (mon.notes) am += `\n비고: ${mon.notes}`;
-                    alert(am);
-                  });
-                  mld.appendChild(mcdiv);
-                });
-                ediv.appendChild(mld);
-              }
-              ew.appendChild(ediv);
-            });
-            sdiv.appendChild(ew);
-          }
+          sdiv.appendChild(gdiv); /* extras 로직 제거 */
           floorPlanContainer.appendChild(sdiv);
           if (i < schoolLayout.length - 1) {
             const dv = document.createElement('hr');
@@ -1114,7 +1053,7 @@
             msf = Math.min(msf, ws, hs);
           }
           let cphu = m;
-          let ifop = true; // cphu: Current Page Height Used, ifop: Is First On Page
+          let ifop = true;
           for (let i = 0; i < sc.length; i++) {
             const pr = 50 + Math.round(((i + 1) / sc.length) * 50);
             pdfOverlay.querySelector('span').textContent = `PDF 페이지 생성 중... (${pr}%)`;
@@ -1138,7 +1077,7 @@
               pdf.setLineWidth(0.3);
               pdf.line(m, dy, m + cw, dy);
               py = cphu + sg;
-            } // divider 추가 및 위치 조정
+            }
             const px = m + (cw - fiw) / 2;
             pdf.addImage(can.toDataURL('image/png'), 'PNG', px, py, fiw, fih);
             cphu = py + fih;
