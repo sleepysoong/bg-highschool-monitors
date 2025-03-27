@@ -314,7 +314,7 @@
               let alertMessage = `고유 번호: ${monitor.id}\n현재 위치: ${locationKey || monitor.current}\n이전 위치: ${previousLocationDisplay}`;
               // 비고(notes)가 있을 때만 추가 (이제 여러 줄 가능)
               if (monitor.notes) alertMessage += `\n비고: ${monitor.notes}`;
-              if (monitor.installStatus !== 'O') alertMessage += `\n\n* 현재 사용중이지 않거나 사용 여부를 알 수 없는 모니터 입니다.)`;
+              if (monitor.installStatus !== 'O') alertMessage += `\n\n* 현재 사용중이지 않거나 사용 여부를 알 수 없는 모니터 입니다.`;
               alert(alertMessage);
           }); return monitorCubeDiv;
       }
@@ -365,7 +365,7 @@
         if (lostMonitors.length === 0) { lostMonitorsContainer.style.display = 'none'; return; }
         lostMonitorsContainer.style.display = 'block';
         const sectionDiv = document.createElement('div'); sectionDiv.className = 'floor-section';
-        const labelDiv = document.createElement('div'); labelDiv.className = 'section-label'; labelDiv.textContent = `사라짐 (${lostMonitors.length})`; sectionDiv.appendChild(labelDiv);
+        const labelDiv = document.createElement('div'); labelDiv.className = 'section-label'; labelDiv.textContent = `어디론가 사라짐 (${lostMonitors.length})`; sectionDiv.appendChild(labelDiv);
         const groupedLostMonitors = lostMonitors.reduce((acc, monitor) => {
             const prevLocation = monitor.previous;
             if (!acc[prevLocation]) acc[prevLocation] = [];
@@ -379,7 +379,7 @@
             locationNameDiv.textContent = `[이전] ${prevLocation}`; // '[이전 위치]' -> '[이전]' 으로 축약
             locationCube.appendChild(locationNameDiv);
             const monitorListDiv = document.createElement('div'); monitorListDiv.className = 'lost-monitor-list';
-            groupedLostMonitors[prevLocation].forEach(monitor => { monitorListDiv.appendChild(createMonitorCube(monitor, '사라짐')); });
+            groupedLostMonitors[prevLocation].forEach(monitor => { monitorListDiv.appendChild(createMonitorCube(monitor, '어디론가 사라짐')); });
             locationCube.appendChild(monitorListDiv); gridDiv.appendChild(locationCube);
         });
         sectionDiv.appendChild(gridDiv); lostMonitorsContainer.appendChild(sectionDiv);
