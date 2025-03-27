@@ -116,17 +116,74 @@
         });
       }
 
-      function parseCSV(text) { /* 변경 없음 */
-        const lines = text.trim().split('\n'); if (lines.length < 1) return { data: [] };
-        const data = lines.slice(1).map(line => {
-            const row = []; let currentField = ''; let inQuotes = false;
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                if (char === '"' && (i === 0 || line[i - 1] !== '\\')) inQuotes = !inQuotes;
-                else if (char === ',' && !inQuotes) { row.push(currentField.trim().replace(/^"|"$/g, '').replace(/\\"/g, '"')); currentField = ''; }
-                else currentField += char;
-            } row.push(currentField.trim().replace(/^"|"$/g, '').replace(/\\"/g, '"')); return row;
-        }); return { data: data };
+      // *** 수정된 CSV 파싱 함수 ***
+      function parseCSV(text) {
+          const rows = [];
+          let currentRow = [];
+          let currentField = '';
+          let inQuotes = false;
+          // 줄바꿈 문자 정규화 (\r\n, \r -> \n)
+          text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+          // 마지막 줄에 개행 문자가 없어도 처리되도록 끝에 \n 추가 (선택적)
+          if (text.length > 0 && text[text.length - 1] !== '\n') {
+              text += '\n';
+          }
+
+          for (let i = 0; i < text.length; i++) {
+              const char = text[i];
+              const nextChar = text[i + 1];
+
+              if (!inQuotes) {
+                  if (char === '"') {
+                      // 따옴표 시작 (필드 시작 부분의 따옴표는 무시)
+                      if (currentField === '') {
+                           inQuotes = true;
+                      } else {
+                          // 필드 중간의 따옴표는 일단 내용으로 추가 (오류 가능성 있음)
+                          // CSV 표준에 따라서는 필드 중간에 따옴표가 나오면 안됨.
+                          currentField += char;
+                      }
+                  } else if (char === ',') {
+                      // 필드 구분자
+                      currentRow.push(currentField);
+                      currentField = '';
+                  } else if (char === '\n') {
+                      // 행 구분자
+                      currentRow.push(currentField); // 현재 필드 추가
+                      // 헤더 행이 아니거나, 내용이 있는 행만 추가
+                      if (rows.length > 0 || currentRow.some(field => field !== '')) {
+                           rows.push(currentRow);
+                      }
+                      currentRow = [];
+                      currentField = '';
+                  } else {
+                      // 일반 문자
+                      currentField += char;
+                  }
+              } else { // Inside quotes
+                  if (char === '"') {
+                      if (nextChar === '"') {
+                          // 이스케이프된 따옴표 "" -> " 하나로 처리
+                          currentField += '"';
+                          i++; // 다음 따옴표 건너뛰기
+                      } else {
+                          // 따옴표 종료
+                          inQuotes = false;
+                          // 따옴표 뒤에 바로 쉼표나 개행이 아닌 문자가 오면 표준 위반이지만, 일단 허용
+                      }
+                  } else {
+                      // 따옴표 안의 모든 문자 (쉼표, 개행 포함) 추가
+                      currentField += char;
+                  }
+              }
+          }
+
+          // 헤더 행(첫 번째 행) 제거 후 데이터 반환
+          if (rows.length > 0) {
+            return { data: rows.slice(1) };
+          } else {
+            return { data: [] };
+          }
       }
 
       // Helper function to normalize data to '?'
@@ -149,37 +206,38 @@
           const response = await fetch(fetchUrl);
           if (!response.ok) throw new Error(`HTTP 오류! 상태: ${response.status}`);
           const csvText = await response.text();
-          const { data } = parseCSV(csvText);
+          const { data } = parseCSV(csvText); // 수정된 파서 사용
 
           if (data.length === 0) console.warn("시트 데이터가 비어있습니다.");
 
           allMonitors = data.map(row => {
+            // CSV 파싱 결과가 row 배열이 아닐 수 있으므로 방어 코드 추가
+            if (!Array.isArray(row)) {
+                console.warn("잘못된 형식의 행 데이터:", row);
+                return null; // 잘못된 데이터는 null 반환
+            }
             const currentInfo = row[COL_INDEX.CURRENT_INFO] || '';
             const parts = currentInfo.split('/');
-            // 모든 주요 데이터 '?' 통일 적용
             return {
-              installStatus: normalizeValue(row[COL_INDEX.INSTALL_STATUS]).toUpperCase(), // 결과는 'O', 'X', '?' 등이 될 수 있음
+              installStatus: normalizeValue(row[COL_INDEX.INSTALL_STATUS]).toUpperCase(),
               id: normalizeValue(row[COL_INDEX.ID]),
-              building: parts[0]?.trim() || 'UB', // 건물/층 정보는 유지
+              building: parts[0]?.trim() || 'UB',
               floor: parts[1]?.trim() || 'UF',
               current: normalizeValue(row[COL_INDEX.CURRENT_LOCATION_NAME]),
               previous: normalizeValue(row[COL_INDEX.PREVIOUS_LOCATION]),
-              notes: row[COL_INDEX.NOTES] || '' // 비고는 빈 문자열 유지
+              // 비고(Notes)는 normalizeValue 적용 안 함 (빈 문자열 유지)
+              notes: row[COL_INDEX.NOTES] || ''
             };
-          });
+          }).filter(monitor => monitor !== null); // null 제거
 
           schoolLayout.forEach(floor => { monitorsCountPerFloor[floor.label] = 0; });
 
           allMonitors.forEach(monitor => {
-            // ID가 '?'인 모니터는 건너뛰기 (식별 불가)
             if (monitor.id === '?') {
-                console.warn("ID가 없는 모니터 데이터 건너뜁니다.");
+                console.warn("ID가 '?'인 모니터 데이터 건너뜁니다.");
                 return;
             }
-
             const potentialKey = monitor.building === '체육관' ? `체육관 ${monitor.current}` : `${monitor.floor} ${monitor.current}`;
-
-            // current가 '?' 이거나, 유효 위치에 없으면 사라짐 처리
             if (monitor.current === '?' || !validLocations.has(potentialKey)) {
                 lostMonitors.push(monitor);
             } else {
@@ -237,16 +295,14 @@
         } return cubeDiv;
       }
 
-      function createMonitorCube(monitor, locationKey) { /* '?' 통일 반영 확인 */
+      function createMonitorCube(monitor, locationKey) { /* 변경 없음 */
           const monitorCubeDiv = document.createElement('div');
           monitorCubeDiv.className = 'monitor-cube';
-          // installStatus도 '?'일 수 있음. 'O'가 아니면 [X] 표시 유지
           const displayId = monitor.installStatus !== 'O' ? `[X] ${monitor.id}` : monitor.id;
-          monitorCubeDiv.textContent = displayId; monitorCubeDiv.title = monitor.id; // title에는 원래 ID 표시
+          monitorCubeDiv.textContent = displayId; monitorCubeDiv.title = monitor.id;
           monitorCubeDiv.classList.remove('status-green', 'status-red', 'status-yellow');
           if (monitor.current !== '?' && monitor.previous === '=') monitorCubeDiv.classList.add('status-green');
           else if (monitor.previous === '?' || monitor.current === '?') monitorCubeDiv.classList.add('status-red');
-          // installStatus가 '?'인 경우도 노란색으로 처리 (사용 중('O')이 아닌 경우)
           else if (monitor.installStatus !== 'O') monitorCubeDiv.classList.add('status-yellow');
 
           monitorCubeDiv.addEventListener('click', () => {
@@ -255,9 +311,10 @@
                   let found = false;
                   for (const [key, value] of validLocations.entries()) { if (value.name === previousLocationDisplay) { previousLocationDisplay = key; found = true; break; } }
               }
-              let alertMessage = `모니터 정보\n--------------------\nID: ${monitor.id}\n현재 위치: ${locationKey || monitor.current}\n이전 위치: ${previousLocationDisplay}`; // current/previous 는 이미 '?' 처리됨
+              let alertMessage = `고유 번호: ${monitor.id}\n현재 위치: ${locationKey || monitor.current}\n이전 위치: ${previousLocationDisplay}`;
+              // 비고(notes)가 있을 때만 추가 (이제 여러 줄 가능)
               if (monitor.notes) alertMessage += `\n비고: ${monitor.notes}`;
-              if (monitor.installStatus !== 'O') alertMessage += `\n\n* 현재 사용중이지 않은 모니터 입니다. (상태: ${monitor.installStatus})`; // 상태값 표시 추가
+              if (monitor.installStatus !== 'O') alertMessage += `\n\n* 현재 사용중이지 않거나 사용 여부를 알 수 없는 모니터 입니다.)`;
               alert(alertMessage);
           }); return monitorCubeDiv;
       }
@@ -303,7 +360,7 @@
         });
       }
 
-      function renderLostMonitors(lostMonitors) { /* 변경 없음 */
+      function renderLostMonitors(lostMonitors) { /* 이전 위치 텍스트 수정 */
         lostMonitorsContainer.innerHTML = '';
         if (lostMonitors.length === 0) { lostMonitorsContainer.style.display = 'none'; return; }
         lostMonitorsContainer.style.display = 'block';
@@ -318,7 +375,9 @@
         Object.keys(groupedLostMonitors).sort().forEach(prevLocation => {
             const locationCube = document.createElement('div'); locationCube.className = 'lost-location-cube';
             const locationNameDiv = document.createElement('div'); locationNameDiv.className = 'lost-location-name';
-            locationNameDiv.textContent = `[이전 위치] ${prevLocation}`; locationCube.appendChild(locationNameDiv);
+            // 사라짐 섹션의 이전 위치 표시 텍스트 변경
+            locationNameDiv.textContent = `[이전] ${prevLocation}`; // '[이전 위치]' -> '[이전]' 으로 축약
+            locationCube.appendChild(locationNameDiv);
             const monitorListDiv = document.createElement('div'); monitorListDiv.className = 'lost-monitor-list';
             groupedLostMonitors[prevLocation].forEach(monitor => { monitorListDiv.appendChild(createMonitorCube(monitor, '사라짐')); });
             locationCube.appendChild(monitorListDiv); gridDiv.appendChild(locationCube);
@@ -339,7 +398,7 @@
         clearTimeout(resizeTimeout); resizeTimeout = setTimeout(func, wait);
       }
 
-      async function generatePDF() { /* 변경 없음 (이전 답변의 PDF 로직 유지) */
+      async function generatePDF() { /* PDF 파일 이름 수정 */
         downloadButton.disabled = true; refreshButton.disabled = true;
         pdfOverlay.querySelector('span').textContent = 'PDF 생성 준비 중...';
         pdfOverlay.classList.add('visible');
@@ -380,6 +439,7 @@
                 pdf.addImage(canvas.toDataURL('image/png'), 'PNG', positionX, positionY, finalWidth, finalHeight);
                 currentPageHeightUsed = positionY + finalHeight; isFirstSectionOnPage = false;
             }
+            // PDF 파일 이름 사용자 지정 이름으로 변경
             pdf.save('부광고등학교_모니터_현황.pdf');
 
         } catch (error) {
