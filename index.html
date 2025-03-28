@@ -8,7 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-      /* 기존 스타일 유지 (변경 없음) */
       @font-face { font-family: 'Freesentation-9Black'; src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-9Black.woff2') format('woff2'); font-weight: 900; font-style: normal; }
       @font-face { font-family: 'Pretendard-Regular'; src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff'); font-weight: 400; font-style: normal; }
       body { font-family: 'Pretendard-Regular', sans-serif; background-color: #F8F9FA; display: flex; flex-direction: column; align-items: center; padding: 60px 20px 20px 20px; color: #333; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; overflow-x: hidden; }
@@ -45,6 +44,7 @@
       .monitor-cube.status-green { background-color: #E8F5E9; border-color: #C8E6C9; color: #1B5E20; }
       .monitor-cube.status-red { background-color: #FFEBEE; border-color: #FFCDD2; color: #B71C1C; }
       .monitor-cube.status-yellow { background-color: #FFFACD; border-color: #FFEC8B; color: #8B7500; }
+      .monitor-cube.status-blue { background-color: #BBDEFB; border-color: #90CAF9; color: #0D47A1; }
       .monitor-cube:hover { filter: brightness(95%); }
       #loading-message, #error-message { margin-top: 20px; font-size: 16px; color: #6c757d; white-space: pre-wrap; word-break: break-all; max-width: 80%; text-align: center; letter-spacing: -0.05em; }
       #error-message { color: #dc3545; }
@@ -85,7 +85,6 @@
         PREVIOUS_LOCATION: 4, NOTES: 5
       };
 
-      // 학교 구조 데이터 (변경 없음)
       const schoolLayout = [
         { label: '5층', columns: 9, rooms: [{ name: '웅비관', col: 1, row: 1, colSpan: 3 }, { name: '3학년 상담실', col: 4, row: 1 }, { name: '푸르미르터3', col: 6, row: 1, colSpan: 2 }, { name: '혜움터3', col: 6, row: 2 }, { name: '서로나눔3', col: 6, row: 3 }, { name: '교재연구실', col: 6, row: 4 }, { name: '3-8', col: 1, row: 5 }, { name: '3-7', col: 2, row: 5 }, { name: '3-6', col: 3, row: 5 }, { name: '3-5', col: 4, row: 5 }, { name: '3학년 연구실', col: 5, row: 5 }, { name: '3-4', col: 6, row: 5 }, { name: '3-3', col: 7, row: 5 }, { name: '3-2', col: 8, row: 5 }, { name: '3-1', col: 9, row: 5 }], corridors: [{ col: 5, row: 1 }, { col: 5, row: 2 }, { col: 5, row: 3 }, { col: 5, row: 4 }] },
         { label: '4층', columns: 9, rooms: [{ name: 'AI융합ON', col: 1, row: 1 }, { name: '여교직원 휴게실', col: 2, row: 1 }, { name: '학생자치실', col: 3, row: 1 }, { name: '2학년 상담실', col: 4, row: 1 }, { name: '푸르미르터2', col: 6, row: 1, colSpan: 2 }, { name: '혜움터2', col: 6, row: 2 }, { name: '서로나눔2', col: 6, row: 3 }, { name: '사회교과교실', col: 1, row: 5 }, { name: '2-7', col: 2, row: 5 }, { name: '2-6', col: 3, row: 5 }, { name: '2-5', col: 4, row: 5 }, { name: '2학년 연구실', col: 5, row: 5 }, { name: '2-4', col: 6, row: 5 }, { name: '2-3', col: 7, row: 5 }, { name: '2-2', col: 8, row: 5 }, { name: '2-1', col: 9, row: 5 }], corridors: [{ col: 5, row: 1 }, { col: 5, row: 2 }, { col: 5, row: 3 }, { col: 5, row: 4 }, { col: 6, row: 4 }] },
@@ -116,15 +115,12 @@
         });
       }
 
-      // *** 수정된 CSV 파싱 함수 ***
       function parseCSV(text) {
           const rows = [];
           let currentRow = [];
           let currentField = '';
           let inQuotes = false;
-          // 줄바꿈 문자 정규화 (\r\n, \r -> \n)
           text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-          // 마지막 줄에 개행 문자가 없어도 처리되도록 끝에 \n 추가 (선택적)
           if (text.length > 0 && text[text.length - 1] !== '\n') {
               text += '\n';
           }
@@ -135,50 +131,38 @@
 
               if (!inQuotes) {
                   if (char === '"') {
-                      // 따옴표 시작 (필드 시작 부분의 따옴표는 무시)
                       if (currentField === '') {
                            inQuotes = true;
                       } else {
-                          // 필드 중간의 따옴표는 일단 내용으로 추가 (오류 가능성 있음)
-                          // CSV 표준에 따라서는 필드 중간에 따옴표가 나오면 안됨.
                           currentField += char;
                       }
                   } else if (char === ',') {
-                      // 필드 구분자
                       currentRow.push(currentField);
                       currentField = '';
                   } else if (char === '\n') {
-                      // 행 구분자
-                      currentRow.push(currentField); // 현재 필드 추가
-                      // 헤더 행이 아니거나, 내용이 있는 행만 추가
+                      currentRow.push(currentField);
                       if (rows.length > 0 || currentRow.some(field => field !== '')) {
                            rows.push(currentRow);
                       }
                       currentRow = [];
                       currentField = '';
                   } else {
-                      // 일반 문자
                       currentField += char;
                   }
-              } else { // Inside quotes
+              } else {
                   if (char === '"') {
                       if (nextChar === '"') {
-                          // 이스케이프된 따옴표 "" -> " 하나로 처리
                           currentField += '"';
-                          i++; // 다음 따옴표 건너뛰기
+                          i++;
                       } else {
-                          // 따옴표 종료
                           inQuotes = false;
-                          // 따옴표 뒤에 바로 쉼표나 개행이 아닌 문자가 오면 표준 위반이지만, 일단 허용
                       }
                   } else {
-                      // 따옴표 안의 모든 문자 (쉼표, 개행 포함) 추가
                       currentField += char;
                   }
               }
           }
 
-          // 헤더 행(첫 번째 행) 제거 후 데이터 반환
           if (rows.length > 0) {
             return { data: rows.slice(1) };
           } else {
@@ -186,7 +170,6 @@
           }
       }
 
-      // Helper function to normalize data to '?'
       function normalizeValue(value) {
           const trimmedValue = value?.trim();
           return (!trimmedValue || trimmedValue.toUpperCase() === 'N/A') ? '?' : trimmedValue;
@@ -206,15 +189,14 @@
           const response = await fetch(fetchUrl);
           if (!response.ok) throw new Error(`HTTP 오류! 상태: ${response.status}`);
           const csvText = await response.text();
-          const { data } = parseCSV(csvText); // 수정된 파서 사용
+          const { data } = parseCSV(csvText);
 
           if (data.length === 0) console.warn("시트 데이터가 비어있습니다.");
 
           allMonitors = data.map(row => {
-            // CSV 파싱 결과가 row 배열이 아닐 수 있으므로 방어 코드 추가
             if (!Array.isArray(row)) {
                 console.warn("잘못된 형식의 행 데이터:", row);
-                return null; // 잘못된 데이터는 null 반환
+                return null;
             }
             const currentInfo = row[COL_INDEX.CURRENT_INFO] || '';
             const parts = currentInfo.split('/');
@@ -225,10 +207,9 @@
               floor: parts[1]?.trim() || 'UF',
               current: normalizeValue(row[COL_INDEX.CURRENT_LOCATION_NAME]),
               previous: normalizeValue(row[COL_INDEX.PREVIOUS_LOCATION]),
-              // 비고(Notes)는 normalizeValue 적용 안 함 (빈 문자열 유지)
               notes: row[COL_INDEX.NOTES] || ''
             };
-          }).filter(monitor => monitor !== null); // null 제거
+          }).filter(monitor => monitor !== null);
 
           schoolLayout.forEach(floor => { monitorsCountPerFloor[floor.label] = 0; });
 
@@ -274,7 +255,7 @@
         }
       }
 
-      function createCube(roomData, isCorridor = false, floorLabel = '', monitorCounts, monitorsByLocation) { /* 변경 없음 */
+      function createCube(roomData, isCorridor = false, floorLabel = '', monitorCounts, monitorsByLocation) {
         const cubeDiv = document.createElement('div');
         cubeDiv.className = isCorridor ? 'cube corridor' : 'cube';
         cubeDiv.style.gridColumn = `${roomData.col} / span ${roomData.colSpan || 1}`;
@@ -295,15 +276,27 @@
         } return cubeDiv;
       }
 
-      function createMonitorCube(monitor, locationKey) { /* 변경 없음 */
+      function createMonitorCube(monitor, locationKey) {
           const monitorCubeDiv = document.createElement('div');
           monitorCubeDiv.className = 'monitor-cube';
           const displayId = monitor.installStatus !== 'O' ? `[X] ${monitor.id}` : monitor.id;
           monitorCubeDiv.textContent = displayId; monitorCubeDiv.title = monitor.id;
-          monitorCubeDiv.classList.remove('status-green', 'status-red', 'status-yellow');
-          if (monitor.current !== '?' && monitor.previous === '=') monitorCubeDiv.classList.add('status-green');
-          else if (monitor.previous === '?' || monitor.current === '?') monitorCubeDiv.classList.add('status-red');
-          else if (monitor.installStatus !== 'O') monitorCubeDiv.classList.add('status-yellow');
+          monitorCubeDiv.classList.remove('status-green', 'status-red', 'status-yellow', 'status-blue');
+
+          const currentLocationX = monitor.current.toUpperCase() === 'X';
+          const previousLocationX = monitor.previous.toUpperCase() === 'X';
+          const previousLocationEqual = monitor.previous === '=';
+          const installStatusNotO = monitor.installStatus !== 'O';
+
+          if (installStatusNotO) {
+              monitorCubeDiv.classList.add('status-red');
+          } else if (previousLocationX || currentLocationX) {
+              monitorCubeDiv.classList.add('status-yellow');
+          } else if (previousLocationEqual && !currentLocationX) {
+              monitorCubeDiv.classList.add('status-blue');
+          } else if (!currentLocationX) {
+              monitorCubeDiv.classList.add('status-green');
+          }
 
           monitorCubeDiv.addEventListener('click', () => {
               let previousLocationDisplay = monitor.previous;
@@ -312,14 +305,13 @@
                   for (const [key, value] of validLocations.entries()) { if (value.name === previousLocationDisplay) { previousLocationDisplay = key; found = true; break; } }
               }
               let alertMessage = `고유 번호: ${monitor.id}\n현재 위치: ${locationKey || monitor.current}\n이전 위치: ${previousLocationDisplay}`;
-              // 비고(notes)가 있을 때만 추가 (이제 여러 줄 가능)
               if (monitor.notes) alertMessage += `\n비고: ${monitor.notes}`;
               if (monitor.installStatus !== 'O') alertMessage += `\n\n* 현재 사용중이지 않거나 사용 여부를 알 수 없는 모니터 입니다.`;
               alert(alertMessage);
           }); return monitorCubeDiv;
       }
 
-      function adjustRowHeights() { /* 변경 없음 - 필요시 이전 답변 코드 사용 */
+      function adjustRowHeights() {
           requestAnimationFrame(() => {
               const gridContainers = document.querySelectorAll('.grid-container, .lost-monitors-grid');
               gridContainers.forEach(grid => {
@@ -345,7 +337,7 @@
           });
       }
 
-      function renderLayout(monitorCounts, monitorsByLocation, monitorsCountPerFloor) { /* 변경 없음 */
+      function renderLayout(monitorCounts, monitorsByLocation, monitorsCountPerFloor) {
         floorPlanContainer.innerHTML = '';
         schoolLayout.forEach((floorData, index) => {
           const sectionDiv = document.createElement('div'); sectionDiv.id = `section-${floorData.label.replace(/[^a-zA-Z0-9]/g, '') || index}`; sectionDiv.className = 'floor-section';
@@ -360,7 +352,7 @@
         });
       }
 
-      function renderLostMonitors(lostMonitors) { /* 이전 위치 텍스트 수정 */
+      function renderLostMonitors(lostMonitors) {
         lostMonitorsContainer.innerHTML = '';
         if (lostMonitors.length === 0) { lostMonitorsContainer.style.display = 'none'; return; }
         lostMonitorsContainer.style.display = 'block';
@@ -385,7 +377,7 @@
         adjustRowHeights(); scaleLayout();
       }
 
-      function scaleLayout() { /* 변경 없음 */
+      function scaleLayout() {
         const floorPlan = document.querySelector('.floor-plan'); if (!floorPlan) return;
         floorPlan.style.transform = 'scale(1)'; const containerWidth = floorPlan.scrollWidth; const windowWidth = window.innerWidth;
         const availableWidth = windowWidth - 40; let scale = 1;
@@ -393,11 +385,10 @@
         document.querySelectorAll('.floor-plan').forEach(container => { container.style.transform = `scale(${scale})`; });
       }
 
-      function debounce(func, wait) { /* 변경 없음 */
+      function debounce(func, wait) {
         clearTimeout(resizeTimeout); resizeTimeout = setTimeout(func, wait);
       }
 
-      // PC Chrome, Firefox 환경인지 확인하는 함수
       function isDesktopChromeOrFirefox() {
         const platform = navigator.platform.toLowerCase();
         const userAgent = navigator.userAgent.toLowerCase();
@@ -406,10 +397,10 @@
         return isWindowsOrMac && isChromeOrFirefox;
       }
 
-      async function generatePDF() { /* PDF 파일 이름 수정 및 폰트 변경 로직 추가 */
+      async function generatePDF() {
         if (!isDesktopChromeOrFirefox()) {
           alert("데스크탑 환경의 Chrome 브라우저에서만 PDF 다운로드가 가능합니다.");
-          return; // PDF 생성 중단
+          return;
         }
 
         downloadButton.disabled = true; refreshButton.disabled = true;
@@ -454,14 +445,13 @@
                 pdf.addImage(canvas.toDataURL('image/png'), 'PNG', positionX, positionY, finalWidth, finalHeight);
                 currentPageHeightUsed = positionY + finalHeight; isFirstSectionOnPage = false;
             }
-            // PDF 파일 이름 사용자 지정 이름으로 변경
             pdf.save('부광고등학교_모니터_현황.pdf');
 
         } catch (error) {
           console.error("PDF 생성 오류:", error); errorMessage.textContent = `PDF 생성 오류: ${error.message}`; errorMessage.style.display = 'block';
         } finally {
           pdfOverlay.classList.remove('visible'); document.body.classList.remove('pdf-capture-mode');
-          document.body.classList.remove('pdf-default-font'); // PDF 생성 완료 후 클래스 제거
+          document.body.classList.remove('pdf-default-font');
           setTimeout(() => { downloadButton.disabled = false; refreshButton.disabled = false; }, 300);
         }
       }
