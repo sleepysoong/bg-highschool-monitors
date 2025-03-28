@@ -1,6 +1,6 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="ko">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>부광고등학교 모니터 조사</title>
@@ -8,8 +8,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-      @font-face { font-family: 'Freesentation-9Black'; src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-9Black.woff2') format('woff2'); font-weight: 900; font-style: normal; }
-      @font-face { font-family: 'Pretendard-Regular'; src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff'); font-weight: 400; font-style: normal; }
+      @font-face {
+        font-family: 'Freesentation-9Black';
+        src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-9Black.woff2') format('woff2');
+        font-weight: 900;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: 'Pretendard-Regular';
+        src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+        font-weight: 400;
+        font-style: normal;
+      }
 
       :root {
         --font-primary: 'Pretendard-Regular', sans-serif;
@@ -57,7 +68,6 @@
         --color-pdf-label-text: #333333;
         --color-pdf-lost-cube-bg: #f8f9fa;
         --color-pdf-lost-cube-border: #dee2e6;
-
         --cube-min-height: 60px;
         --grid-gap: 3px;
         --cube-border-radius: 5px;
@@ -102,10 +112,25 @@
         align-items: center;
         gap: 6px;
       }
-      .icon-button span { letter-spacing: -0.05em; }
-      .icon-button:hover { background-color: var(--color-button-hover); }
-      .icon-button:disabled { background-color: var(--color-button-disabled); cursor: not-allowed; }
-      .icon-button svg { width: 1em; height: 1em; fill: currentColor; }
+
+      .icon-button span {
+        letter-spacing: -0.05em;
+      }
+
+      .icon-button:hover {
+        background-color: var(--color-button-hover);
+      }
+
+      .icon-button:disabled {
+        background-color: var(--color-button-disabled);
+        cursor: not-allowed;
+      }
+
+      .icon-button svg {
+        width: 1em;
+        height: 1em;
+        fill: currentColor;
+      }
 
       #pdf-overlay {
         position: fixed;
@@ -125,7 +150,11 @@
         transition: opacity 0.3s ease, visibility 0.3s ease;
         text-align: center;
       }
-      #pdf-overlay.visible { opacity: 1; visibility: visible; }
+
+      #pdf-overlay.visible {
+        opacity: 1;
+        visibility: visible;
+      }
 
       .floor-plan {
         display: flex;
@@ -151,12 +180,11 @@
       }
 
       #section-lost {
-         width: auto;
-         max-width: calc(930px + 44px);
-         margin-left: auto;
-         margin-right: auto;
+        width: auto;
+        max-width: calc(930px + 44px);
+        margin-left: auto;
+        margin-right: auto;
       }
-
 
       .section-divider {
         border: none;
@@ -177,6 +205,7 @@
         min-width: 0 !important;
         max-width: none !important;
       }
+
       .pdf-capture-mode #section-lost {
         width: fit-content !important;
         max-width: none !important;
@@ -191,27 +220,41 @@
         max-width: none !important;
         margin: 0 !important;
       }
+
       .pdf-capture-mode .cube {
         background-color: var(--color-pdf-cube-bg) !important;
         border: 1px solid var(--color-pdf-grid-border) !important;
       }
+
       .pdf-capture-mode .corridor {
         background-color: var(--color-pdf-section-bg) !important;
         border: 1px dashed var(--color-pdf-corridor-border) !important;
       }
-      .pdf-capture-mode .section-divider { display: none !important; }
+
+      .pdf-capture-mode .section-divider {
+        display: none !important;
+      }
+
       .pdf-capture-mode .section-label {
         color: var(--color-pdf-label-text) !important;
         font-family: var(--font-heading) !important;
       }
+
       .pdf-capture-mode body,
       .pdf-capture-mode .cube,
       .pdf-capture-mode .icon-button {
         font-family: var(--font-primary) !important;
       }
-      .pdf-capture-mode .cube-name-text { font-weight: 600 !important; }
+
+      .pdf-capture-mode .cube-name-text {
+        font-weight: 600 !important;
+      }
+
       .pdf-capture-mode .cube,
-      .pdf-capture-mode .monitor-cube { letter-spacing: -0.05em !important; }
+      .pdf-capture-mode .monitor-cube {
+        letter-spacing: -0.05em !important;
+      }
+
       .pdf-capture-mode .lost-location-cube {
         background-color: var(--color-pdf-lost-cube-bg) !important;
         border: 1px solid var(--color-pdf-lost-cube-border) !important;
@@ -226,7 +269,8 @@
         color: #555;
       }
 
-      .grid-container, .lost-monitors-grid {
+      .grid-container,
+      .lost-monitors-grid {
         display: grid;
         gap: var(--grid-gap);
         border: 1px solid var(--color-grid-border);
@@ -234,13 +278,12 @@
         background-color: var(--color-grid-bg);
         padding: var(--grid-gap);
         grid-auto-rows: minmax(var(--cube-min-height), auto);
-
       }
 
       .grid-container {
-         grid-template-columns: repeat(var(--floor-cols, 9), 100px);
-         width: fit-content;
-         margin: 0 auto;
+        grid-template-columns: repeat(var(--floor-cols, 9), 100px);
+        width: fit-content;
+        margin: 0 auto;
       }
 
       .lost-monitors-grid {
@@ -270,8 +313,14 @@
         overflow: visible;
       }
 
-      .cube-name { margin-bottom: 4px; width: 100%; }
-      .cube-name-text { font-weight: 600; }
+      .cube-name {
+        margin-bottom: 4px;
+        width: 100%;
+      }
+
+      .cube-name-text {
+        font-weight: 600;
+      }
 
       .corridor {
         background-color: var(--color-corridor-bg);
@@ -309,14 +358,36 @@
         letter-spacing: -0.05em;
       }
 
-      .monitor-cube.status-green { background-color: var(--color-status-green-bg); border-color: var(--color-status-green-border); color: var(--color-status-green-text); }
-      .monitor-cube.status-red { background-color: var(--color-status-red-bg); border-color: var(--color-status-red-border); color: var(--color-status-red-text); }
-      .monitor-cube.status-yellow { background-color: var(--color-status-yellow-bg); border-color: var(--color-status-yellow-border); color: var(--color-status-yellow-text); }
-      .monitor-cube.status-blue { background-color: var(--color-status-blue-bg); border-color: var(--color-status-blue-border); color: var(--color-status-blue-text); }
+      .monitor-cube.status-green {
+        background-color: var(--color-status-green-bg);
+        border-color: var(--color-status-green-border);
+        color: var(--color-status-green-text);
+      }
 
-      .monitor-cube:hover { filter: brightness(95%); }
+      .monitor-cube.status-red {
+        background-color: var(--color-status-red-bg);
+        border-color: var(--color-status-red-border);
+        color: var(--color-status-red-text);
+      }
 
-      #loading-message, #error-message {
+      .monitor-cube.status-yellow {
+        background-color: var(--color-status-yellow-bg);
+        border-color: var(--color-status-yellow-border);
+        color: var(--color-status-yellow-text);
+      }
+
+      .monitor-cube.status-blue {
+        background-color: var(--color-status-blue-bg);
+        border-color: var(--color-status-blue-border);
+        color: var(--color-status-blue-text);
+      }
+
+      .monitor-cube:hover {
+        filter: brightness(95%);
+      }
+
+      #loading-message,
+      #error-message {
         margin-top: 20px;
         font-size: 16px;
         color: var(--color-loading-text);
@@ -326,7 +397,10 @@
         text-align: center;
         letter-spacing: -0.05em;
       }
-      #error-message { color: var(--color-error-text); }
+
+      #error-message {
+        color: var(--color-error-text);
+      }
 
       .lost-location-cube {
         background-color: var(--color-cube-bg);
@@ -365,27 +439,28 @@
         padding-top: 4px;
       }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="button-container">
       <button class="icon-button" id="refreshButton" title="새로고침">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"></path></svg>
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"></path>
+        </svg>
         <span>새로고침</span>
       </button>
       <button class="icon-button" id="downloadButton" title="PDF 저장">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path>
+        </svg>
         <span>PDF 저장</span>
       </button>
     </div>
-
     <div id="pdf-overlay">
       <span></span>
     </div>
-
     <div id="loading-message" style="display: none;"></div>
     <div id="error-message" style="display: none;"></div>
     <div class="floor-plan" id="floorPlanContainer"></div>
-
     <script>
       (function() {
         const SHEET_ID = '1g--ydME6sFvsE44He1C4AO4uQRxwOtJm';
@@ -393,22 +468,35 @@
         const MONITOR_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${MONITOR_SHEET_GID}`;
         const LAYOUT_SHEET_GID = '183478124';
         const LAYOUT_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${LAYOUT_SHEET_GID}`;
-
         const COL_INDEX_MONITOR = {
-          INSTALL_STATUS: 0, ID: 1, CURRENT_INFO: 2, CURRENT_LOCATION_NAME: 3,
-          PREVIOUS_LOCATION: 4, NOTES: 5
+          INSTALL_STATUS: 0,
+          ID: 1,
+          CURRENT_INFO: 2,
+          CURRENT_LOCATION_NAME: 3,
+          PREVIOUS_LOCATION: 4,
+          NOTES: 5
         };
-
         const COL_INDEX_LAYOUT = {
-          FLOOR_LABEL: 0, GRID_COLUMNS: 1, ELEMENT_TYPE: 2, ELEMENT_NAME: 3,
-          GRID_COL: 4, GRID_ROW: 5, GRID_COL_SPAN: 6, GRID_ROW_SPAN: 7
+          FLOOR_LABEL: 0,
+          GRID_COLUMNS: 1,
+          ELEMENT_TYPE: 2,
+          ELEMENT_NAME: 3,
+          GRID_COL: 4,
+          GRID_ROW: 5,
+          GRID_COL_SPAN: 6,
+          GRID_ROW_SPAN: 7
         };
-
-        const STATUS = { INSTALLED: 'O', UNKNOWN: '?', EQUAL: '=' };
-        const ELEMENT_TYPE = { ROOM: 'Room', CORRIDOR: 'Corridor' };
+        const STATUS = {
+          INSTALLED: 'O',
+          UNKNOWN: '?',
+          EQUAL: '='
+        };
+        const ELEMENT_TYPE = {
+          ROOM: 'Room',
+          CORRIDOR: 'Corridor'
+        };
         const UNKNOWN_VALUE = '?';
         const LOST_LOCATION_LABEL = '어디론가 사라짐';
-
         const DOM_IDS = {
           FLOOR_PLAN_CONTAINER: 'floorPlanContainer',
           REFRESH_BUTTON: 'refreshButton',
@@ -417,24 +505,34 @@
           ERROR_MESSAGE: 'error-message',
           PDF_OVERLAY: 'pdf-overlay'
         };
-
         const CSS_CLASSES = {
-          VISIBLE: 'visible', FLOOR_SECTION: 'floor-section', SECTION_LABEL: 'section-label',
-          GRID_CONTAINER: 'grid-container', LOST_MONITORS_GRID: 'lost-monitors-grid',
-          CUBE: 'cube', CORRIDOR: 'corridor', CUBE_NAME: 'cube-name', CUBE_NAME_TEXT: 'cube-name-text',
-          MONITOR_LIST: 'monitor-list', MONITOR_CUBE: 'monitor-cube',
-          STATUS_GREEN: 'status-green', STATUS_RED: 'status-red', STATUS_YELLOW: 'status-yellow', STATUS_BLUE: 'status-blue',
-          LOST_LOCATION_CUBE: 'lost-location-cube', LOST_LOCATION_NAME: 'lost-location-name',
-          LOST_MONITOR_LIST: 'lost-monitor-list', SECTION_DIVIDER: 'section-divider',
+          VISIBLE: 'visible',
+          FLOOR_SECTION: 'floor-section',
+          SECTION_LABEL: 'section-label',
+          GRID_CONTAINER: 'grid-container',
+          LOST_MONITORS_GRID: 'lost-monitors-grid',
+          CUBE: 'cube',
+          CORRIDOR: 'corridor',
+          CUBE_NAME: 'cube-name',
+          CUBE_NAME_TEXT: 'cube-name-text',
+          MONITOR_LIST: 'monitor-list',
+          MONITOR_CUBE: 'monitor-cube',
+          STATUS_GREEN: 'status-green',
+          STATUS_RED: 'status-red',
+          STATUS_YELLOW: 'status-yellow',
+          STATUS_BLUE: 'status-blue',
+          LOST_LOCATION_CUBE: 'lost-location-cube',
+          LOST_LOCATION_NAME: 'lost-location-name',
+          LOST_MONITOR_LIST: 'lost-monitor-list',
+          SECTION_DIVIDER: 'section-divider',
           PDF_CAPTURE_MODE: 'pdf-capture-mode'
         };
-
-        const { jsPDF } = window.jspdf;
-
+        const {
+          jsPDF
+        } = window.jspdf;
         let validLocations = new Map();
         let schoolLayoutData = [];
         let resizeTimeout;
-
         const floorPlanContainer = document.getElementById(DOM_IDS.FLOOR_PLAN_CONTAINER);
         const refreshButton = document.getElementById(DOM_IDS.REFRESH_BUTTON);
         const downloadButton = document.getElementById(DOM_IDS.DOWNLOAD_BUTTON);
@@ -444,97 +542,119 @@
         const pdfOverlayText = pdfOverlay.querySelector('span');
 
         function createEl(tag, className) {
-            const element = document.createElement(tag);
-            if (className) {
-                if (Array.isArray(className)) element.classList.add(...className);
-                else element.classList.add(className);
-            }
-            return element;
+          const element = document.createElement(tag);
+          if (className) {
+            if (Array.isArray(className)) element.classList.add(...className);
+            else element.classList.add(className);
+          }
+          return element;
         }
-        function setText(element, text) { element.textContent = text; }
-        function setHtml(element, html) { element.innerHTML = html; }
-        function appendChilds(parent, children) { children.forEach(child => parent.appendChild(child)); }
-        function showElement(element) { element.style.display = ''; }
-        function hideElement(element) { element.style.display = 'none'; }
-        function setButtonDisabled(button, disabled) { button.disabled = disabled; }
+
+        function setText(element, text) {
+          element.textContent = text;
+        }
+
+        function setHtml(element, html) {
+          element.innerHTML = html;
+        }
+
+        function appendChilds(parent, children) {
+          children.forEach(child => parent.appendChild(child));
+        }
+
+        function showElement(element) {
+          element.style.display = '';
+        }
+
+        function hideElement(element) {
+          element.style.display = 'none';
+        }
+
+        function setButtonDisabled(button, disabled) {
+          button.disabled = disabled;
+        }
 
         function parseCSV(text) {
-            const rows = []; let currentRow = []; let currentField = ''; let inQuotes = false;
-            text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-            if (text.length > 0 && text[text.length - 1] !== '\n') text += '\n';
-            for (let i = 0; i < text.length; i++) {
-                const char = text[i]; const nextChar = text[i + 1];
-                if (!inQuotes) {
-                    if (char === '"' && currentField === '') inQuotes = true;
-                    else if (char === ',') { currentRow.push(currentField.trim()); currentField = ''; }
-                    else if (char === '\n') {
-                        currentRow.push(currentField.trim());
-                        if (rows.length > 0 || currentRow.some(field => field !== '')) {
-                            rows.push(currentRow);
-                        }
-                        currentRow = []; currentField = '';
-                    } else currentField += char;
-                } else {
-                    if (char === '"') {
-                        if (nextChar === '"') { currentField += '"'; i++; }
-                        else inQuotes = false;
-                    } else currentField += char;
+          const rows = [];
+          let currentRow = [];
+          let currentField = '';
+          let inQuotes = false;
+          text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+          if (text.length > 0 && text[text.length - 1] !== '\n') text += '\n';
+          for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            const nextChar = text[i + 1];
+            if (!inQuotes) {
+              if (char === '"' && currentField === '') inQuotes = true;
+              else if (char === ',') {
+                currentRow.push(currentField.trim());
+                currentField = '';
+              } else if (char === '\n') {
+                currentRow.push(currentField.trim());
+                if (rows.length > 0 || currentRow.some(field => field !== '')) {
+                  rows.push(currentRow);
                 }
+                currentRow = [];
+                currentField = '';
+              } else currentField += char;
+            } else {
+              if (char === '"') {
+                if (nextChar === '"') {
+                  currentField += '"';
+                  i++;
+                } else inQuotes = false;
+              } else currentField += char;
             }
-            return rows.length > 0 ? rows.slice(1) : [];
+          }
+          return rows.length > 0 ? rows.slice(1) : [];
         }
-
-
         async function fetchSheetData(url, type) {
-            const fetchUrl = `${url}&_=${new Date().getTime()}`;
-            try {
-                const response = await fetch(fetchUrl);
-                if (!response.ok) throw new Error(`HTTP 오류 (${type})! 상태: ${response.status}`);
-                const csvText = await response.text();
-                return parseCSV(csvText);
-            } catch (error) {
-                console.error(`${type} 데이터 로딩 오류:`, error);
-                throw new Error(`${type} 시트 데이터를 가져오는 중 오류 발생: ${error.message}`);
-            }
+          const fetchUrl = `${url}&_=${new Date().getTime()}`;
+          try {
+            const response = await fetch(fetchUrl);
+            if (!response.ok) throw new Error(`HTTP 오류 (${type})! 상태: ${response.status}`);
+            const csvText = await response.text();
+            return parseCSV(csvText);
+          } catch (error) {
+            console.error(`${type} 데이터 로딩 오류:`, error);
+            throw new Error(`${type} 시트 데이터를 가져오는 중 오류 발생: ${error.message}`);
+          }
         }
 
         function parseLayoutData(rawData) {
-            const floorsMap = new Map();
-            const floorOrder = [];
-            rawData.forEach(row => {
-                const floorLabel = row[COL_INDEX_LAYOUT.FLOOR_LABEL];
-                if (!floorLabel) return;
-
-                if (!floorsMap.has(floorLabel)) {
-                    const gridColumns = parseInt(row[COL_INDEX_LAYOUT.GRID_COLUMNS], 10) || 9;
-                    floorsMap.set(floorLabel, {
-                        label: floorLabel,
-                        columns: gridColumns,
-                        rooms: [], corridors: []
-                    });
-                    floorOrder.push(floorLabel);
-                }
-
-                const floorData = floorsMap.get(floorLabel);
-                const elementType = row[COL_INDEX_LAYOUT.ELEMENT_TYPE];
-                const element = {
-                    name: row[COL_INDEX_LAYOUT.ELEMENT_NAME] || '',
-                    col: parseInt(row[COL_INDEX_LAYOUT.GRID_COL], 10),
-                    row: parseInt(row[COL_INDEX_LAYOUT.GRID_ROW], 10),
-                    colSpan: parseInt(row[COL_INDEX_LAYOUT.GRID_COL_SPAN], 10) || 1,
-                    rowSpan: parseInt(row[COL_INDEX_LAYOUT.GRID_ROW_SPAN], 10) || 1
-                };
-
-                if (!isNaN(element.col) && !isNaN(element.row)) {
-                    if (elementType === ELEMENT_TYPE.ROOM) {
-                        floorData.rooms.push(element);
-                    } else if (elementType === ELEMENT_TYPE.CORRIDOR) {
-                        floorData.corridors.push(element);
-                    }
-                }
-            });
-
-            return floorOrder.map(label => floorsMap.get(label));
+          const floorsMap = new Map();
+          const floorOrder = [];
+          rawData.forEach(row => {
+            const floorLabel = row[COL_INDEX_LAYOUT.FLOOR_LABEL];
+            if (!floorLabel) return;
+            if (!floorsMap.has(floorLabel)) {
+              const gridColumns = parseInt(row[COL_INDEX_LAYOUT.GRID_COLUMNS], 10) || 9;
+              floorsMap.set(floorLabel, {
+                label: floorLabel,
+                columns: gridColumns,
+                rooms: [],
+                corridors: []
+              });
+              floorOrder.push(floorLabel);
+            }
+            const floorData = floorsMap.get(floorLabel);
+            const elementType = row[COL_INDEX_LAYOUT.ELEMENT_TYPE];
+            const element = {
+              name: row[COL_INDEX_LAYOUT.ELEMENT_NAME] || '',
+              col: parseInt(row[COL_INDEX_LAYOUT.GRID_COL], 10),
+              row: parseInt(row[COL_INDEX_LAYOUT.GRID_ROW], 10),
+              colSpan: parseInt(row[COL_INDEX_LAYOUT.GRID_COL_SPAN], 10) || 1,
+              rowSpan: parseInt(row[COL_INDEX_LAYOUT.GRID_ROW_SPAN], 10) || 1
+            };
+            if (!isNaN(element.col) && !isNaN(element.row)) {
+              if (elementType === ELEMENT_TYPE.ROOM) {
+                floorData.rooms.push(element);
+              } else if (elementType === ELEMENT_TYPE.CORRIDOR) {
+                floorData.corridors.push(element);
+              }
+            }
+          });
+          return floorOrder.map(label => floorsMap.get(label));
         }
 
         function buildValidLocations() {
@@ -542,92 +662,90 @@
           schoolLayoutData.forEach(floor => {
             floor.rooms?.forEach(room => {
               if (room.name) {
-                validLocations.set(room.name, { label: floor.label, name: room.name });
+                validLocations.set(room.name, {
+                  label: floor.label,
+                  name: room.name
+                });
               }
             });
           });
         }
 
         function normalizeValue(value) {
-            return value?.trim() || UNKNOWN_VALUE;
+          return value?.trim() || UNKNOWN_VALUE;
         }
 
         function processMonitorData(rawData) {
-            const allMonitors = rawData.map(row => {
-                if (!Array.isArray(row) || row.length <= Math.max(...Object.values(COL_INDEX_MONITOR))) {
-                    return null;
-                }
-                return {
-                  installStatus: normalizeValue(row[COL_INDEX_MONITOR.INSTALL_STATUS]).toUpperCase(),
-                  id: normalizeValue(row[COL_INDEX_MONITOR.ID]),
-                  current: normalizeValue(row[COL_INDEX_MONITOR.CURRENT_LOCATION_NAME]),
-                  previous: normalizeValue(row[COL_INDEX_MONITOR.PREVIOUS_LOCATION]),
-                  notes: row[COL_INDEX_MONITOR.NOTES] || ''
-                };
-            }).filter(monitor => monitor !== null && monitor.id !== UNKNOWN_VALUE);
-
-            const monitorsByLocation = {};
-            const monitorCounts = {};
-            const monitorsCountPerFloor = {};
-            const lostMonitors = [];
-
-            schoolLayoutData.forEach(floor => { monitorsCountPerFloor[floor.label] = 0; });
-
-            allMonitors.forEach(monitor => {
-                const locationInfo = validLocations.get(monitor.current);
-
-                if (monitor.current === UNKNOWN_VALUE || !locationInfo) {
-                    lostMonitors.push(monitor);
-                } else {
-                    const displayKey = `${locationInfo.label} ${locationInfo.name}`;
-                    const floorLabel = locationInfo.label;
-
-                    monitorCounts[displayKey] = (monitorCounts[displayKey] || 0) + 1;
-
-                    if (!monitorsByLocation[displayKey]) {
-                        monitorsByLocation[displayKey] = [];
-                    }
-                    monitorsByLocation[displayKey].push(monitor);
-
-                    monitorsCountPerFloor[floorLabel] = (monitorsCountPerFloor[floorLabel] || 0) + 1;
-                }
-            });
-
-            return { monitorsByLocation, monitorCounts, monitorsCountPerFloor, lostMonitors };
+          const allMonitors = rawData.map(row => {
+            if (!Array.isArray(row) || row.length <= Math.max(...Object.values(COL_INDEX_MONITOR))) {
+              return null;
+            }
+            return {
+              installStatus: normalizeValue(row[COL_INDEX_MONITOR.INSTALL_STATUS]).toUpperCase(),
+              id: normalizeValue(row[COL_INDEX_MONITOR.ID]),
+              current: normalizeValue(row[COL_INDEX_MONITOR.CURRENT_LOCATION_NAME]),
+              previous: normalizeValue(row[COL_INDEX_MONITOR.PREVIOUS_LOCATION]),
+              notes: row[COL_INDEX_MONITOR.NOTES] || ''
+            };
+          }).filter(monitor => monitor !== null && monitor.id !== UNKNOWN_VALUE);
+          const monitorsByLocation = {};
+          const monitorCounts = {};
+          const monitorsCountPerFloor = {};
+          const lostMonitors = [];
+          schoolLayoutData.forEach(floor => {
+            monitorsCountPerFloor[floor.label] = 0;
+          });
+          allMonitors.forEach(monitor => {
+            const locationInfo = validLocations.get(monitor.current);
+            if (monitor.current === UNKNOWN_VALUE || !locationInfo) {
+              lostMonitors.push(monitor);
+            } else {
+              const displayKey = `${locationInfo.label} ${locationInfo.name}`;
+              const floorLabel = locationInfo.label;
+              monitorCounts[displayKey] = (monitorCounts[displayKey] || 0) + 1;
+              if (!monitorsByLocation[displayKey]) {
+                monitorsByLocation[displayKey] = [];
+              }
+              monitorsByLocation[displayKey].push(monitor);
+              monitorsCountPerFloor[floorLabel] = (monitorsCountPerFloor[floorLabel] || 0) + 1;
+            }
+          });
+          return {
+            monitorsByLocation,
+            monitorCounts,
+            monitorsCountPerFloor,
+            lostMonitors
+          };
         }
 
         function getMonitorStatusClass(monitor) {
-            const currentIsUnknown = monitor.current.toUpperCase() === STATUS.UNKNOWN;
-
-            if (monitor.installStatus !== STATUS.INSTALLED) return CSS_CLASSES.STATUS_RED;
-            if (monitor.previous.toUpperCase() === STATUS.UNKNOWN || currentIsUnknown) return CSS_CLASSES.STATUS_YELLOW;
-            if (monitor.previous === STATUS.EQUAL && !currentIsUnknown) return CSS_CLASSES.STATUS_BLUE;
-            if (!currentIsUnknown) return CSS_CLASSES.STATUS_GREEN;
-
-            return CSS_CLASSES.STATUS_DEFAULT;
+          const currentIsUnknown = monitor.current.toUpperCase() === STATUS.UNKNOWN;
+          if (monitor.installStatus !== STATUS.INSTALLED) return CSS_CLASSES.STATUS_RED;
+          if (monitor.previous.toUpperCase() === STATUS.UNKNOWN || currentIsUnknown) return CSS_CLASSES.STATUS_YELLOW;
+          if (monitor.previous === STATUS.EQUAL && !currentIsUnknown) return CSS_CLASSES.STATUS_BLUE;
+          if (!currentIsUnknown) return CSS_CLASSES.STATUS_GREEN;
+          return CSS_CLASSES.STATUS_DEFAULT;
         }
 
         function createMonitorCubeElement(monitor, displayKey) {
-            const monitorCubeDiv = createEl('div', CSS_CLASSES.MONITOR_CUBE);
-            const displayId = monitor.installStatus !== STATUS.INSTALLED ? `[X] ${monitor.id}` : monitor.id;
-            setText(monitorCubeDiv, displayId);
-            monitorCubeDiv.title = monitor.id;
-
-            const statusClass = getMonitorStatusClass(monitor);
-            if (statusClass) monitorCubeDiv.classList.add(statusClass);
-
-            monitorCubeDiv.addEventListener('click', () => {
-                let previousLocationDisplay = monitor.previous;
-                const prevLocationInfo = validLocations.get(previousLocationDisplay);
-                 if (prevLocationInfo) {
-                     previousLocationDisplay = `${prevLocationInfo.label} ${prevLocationInfo.name}`;
-                 }
-                 let alertMessage = `고유 번호: ${monitor.id}\n현재 위치: ${displayKey || monitor.current}\n이전 위치: ${previousLocationDisplay}`;
-                 if (monitor.notes) alertMessage += `\n비고: ${monitor.notes}`;
-                 if (monitor.installStatus !== STATUS.INSTALLED) alertMessage += `\n\n* 현재 사용중이지 않거나 사용 여부를 알 수 없는 모니터 입니다.`;
-                 alert(alertMessage);
-            });
-            return monitorCubeDiv;
+          const monitorCubeDiv = createEl('div', CSS_CLASSES.MONITOR_CUBE);
+          const displayId = monitor.installStatus !== STATUS.INSTALLED ? `[X] ${monitor.id}` : monitor.id;
+          setText(monitorCubeDiv, displayId);
+          monitorCubeDiv.title = monitor.id;
+          const statusClass = getMonitorStatusClass(monitor);
+          if (statusClass) monitorCubeDiv.classList.add(statusClass);
+          monitorCubeDiv.addEventListener('click', () => {
+            let previousLocationDisplay = monitor.previous;
+            const prevLocationInfo = validLocations.get(previousLocationDisplay);
+            if (prevLocationInfo) {
+              previousLocationDisplay = `${prevLocationInfo.label} ${prevLocationInfo.name}`;
+            }
+            let alertMessage = `고유 번호: ${monitor.id}\n현재 위치: ${displayKey || monitor.current}\n이전 위치: ${previousLocationDisplay}`;
+            if (monitor.installStatus !== STATUS.INSTALLED) alertMessage += `\n\n* 현재 사용중이지 않거나 사용 여부를 알 수 없는 모니터 입니다.`;
+            if (monitor.notes) alertMessage += `\n\n----------\n\n${monitor.notes}`;
+            alert(alertMessage);
+          });
+          return monitorCubeDiv;
         }
 
         function createCubeElement(roomData, isCorridor = false, floorLabel = '', monitorCounts, monitorsByLocation) {
@@ -635,14 +753,13 @@
           cubeDiv.style.gridColumn = `${roomData.col} / span ${roomData.colSpan || 1}`;
           cubeDiv.style.gridRow = `${roomData.row} / span ${roomData.rowSpan || 1}`;
           cubeDiv.dataset.row = roomData.row;
-
           if (!isCorridor) {
             const nameDiv = createEl('div', CSS_CLASSES.CUBE_NAME);
             const displayKey = `${floorLabel} ${roomData.name}`;
             const count = monitorCounts[displayKey] || 0;
-            setHtml(nameDiv, `<span class="${CSS_CLASSES.CUBE_NAME_TEXT}">${roomData.name}</span> ${count > 0 ? `(${count})` : ''}`);
+            setHtml(nameDiv, `
+						<span class="${CSS_CLASSES.CUBE_NAME_TEXT}">${roomData.name}</span> ${count > 0 ? `(${count})` : ''}`);
             cubeDiv.appendChild(nameDiv);
-
             const monitorsInRoom = monitorsByLocation[displayKey];
             if (monitorsInRoom?.length > 0) {
               const monitorListDiv = createEl('div', CSS_CLASSES.MONITOR_LIST);
@@ -656,130 +773,107 @@
         }
 
         function renderFloor(floorData, index, monitorCounts, monitorsByLocation, monitorsCountPerFloor) {
-            const sectionDiv = createEl('div', CSS_CLASSES.FLOOR_SECTION);
-            sectionDiv.id = `section-${floorData.label.replace(/[^a-zA-Z0-9]/g, '') || index}`;
-
-            const labelDiv = createEl('div', CSS_CLASSES.SECTION_LABEL);
-            const floorMonitorCount = monitorsCountPerFloor[floorData.label] || 0;
-            setText(labelDiv, `${floorData.label}${floorMonitorCount > 0 ? ` (${floorMonitorCount})` : ''}`);
-            sectionDiv.appendChild(labelDiv);
-
-            const gridDiv = createEl('div', CSS_CLASSES.GRID_CONTAINER);
-            gridDiv.style.setProperty('--floor-cols', floorData.columns);
-
-            floorData.rooms?.forEach(roomData => {
-                gridDiv.appendChild(createCubeElement(roomData, false, floorData.label, monitorCounts, monitorsByLocation));
-            });
-            floorData.corridors?.forEach(corridorData => {
-                gridDiv.appendChild(createCubeElement(corridorData, true, floorData.label, monitorCounts, monitorsByLocation));
-            });
-
-            appendChilds(sectionDiv, [gridDiv]);
-            appendChilds(floorPlanContainer, [sectionDiv]);
+          const sectionDiv = createEl('div', CSS_CLASSES.FLOOR_SECTION);
+          sectionDiv.id = `section-${floorData.label.replace(/[^a-zA-Z0-9]/g, '') || index}`;
+          const labelDiv = createEl('div', CSS_CLASSES.SECTION_LABEL);
+          const floorMonitorCount = monitorsCountPerFloor[floorData.label] || 0;
+          setText(labelDiv, `${floorData.label}${floorMonitorCount > 0 ? ` (${floorMonitorCount})` : ''}`);
+          sectionDiv.appendChild(labelDiv);
+          const gridDiv = createEl('div', CSS_CLASSES.GRID_CONTAINER);
+          gridDiv.style.setProperty('--floor-cols', floorData.columns);
+          floorData.rooms?.forEach(roomData => {
+            gridDiv.appendChild(createCubeElement(roomData, false, floorData.label, monitorCounts, monitorsByLocation));
+          });
+          floorData.corridors?.forEach(corridorData => {
+            gridDiv.appendChild(createCubeElement(corridorData, true, floorData.label, monitorCounts, monitorsByLocation));
+          });
+          appendChilds(sectionDiv, [gridDiv]);
+          appendChilds(floorPlanContainer, [sectionDiv]);
         }
 
         function renderLostSection(lostMonitors) {
-            if (lostMonitors.length === 0) return;
-
-            const sectionDiv = createEl('div', CSS_CLASSES.FLOOR_SECTION);
-            sectionDiv.id = 'section-lost';
-
-            const labelDiv = createEl('div', CSS_CLASSES.SECTION_LABEL);
-            setText(labelDiv, `${LOST_LOCATION_LABEL} (${lostMonitors.length})`);
-            sectionDiv.appendChild(labelDiv);
-
-            const groupedLostMonitors = lostMonitors.reduce((acc, monitor) => {
-                const prevLocation = monitor.previous || UNKNOWN_VALUE;
-                if (!acc[prevLocation]) acc[prevLocation] = [];
-                acc[prevLocation].push(monitor);
-                return acc;
-            }, {});
-
-            const gridDiv = createEl('div', CSS_CLASSES.LOST_MONITORS_GRID);
-
-            Object.keys(groupedLostMonitors).sort().forEach(prevLocation => {
-                const locationCube = createEl('div', CSS_CLASSES.LOST_LOCATION_CUBE);
-
-                const locationNameDiv = createEl('div', CSS_CLASSES.LOST_LOCATION_NAME);
-                let prevLocationDisplay = prevLocation;
-                const prevLocationInfo = validLocations.get(prevLocation);
-                if (prevLocationInfo) {
-                    prevLocationDisplay = `${prevLocationInfo.label} ${prevLocationInfo.name}`;
-                }
-                setText(locationNameDiv, `[이전] ${prevLocationDisplay}`);
-                locationCube.appendChild(locationNameDiv);
-
-                const monitorListDiv = createEl('div', CSS_CLASSES.LOST_MONITOR_LIST);
-                groupedLostMonitors[prevLocation].forEach(monitor => {
-                    monitorListDiv.appendChild(createMonitorCubeElement(monitor, LOST_LOCATION_LABEL));
-                });
-                locationCube.appendChild(monitorListDiv);
-
-                gridDiv.appendChild(locationCube);
+          if (lostMonitors.length === 0) return;
+          const sectionDiv = createEl('div', CSS_CLASSES.FLOOR_SECTION);
+          sectionDiv.id = 'section-lost';
+          const labelDiv = createEl('div', CSS_CLASSES.SECTION_LABEL);
+          setText(labelDiv, `${LOST_LOCATION_LABEL} (${lostMonitors.length})`);
+          sectionDiv.appendChild(labelDiv);
+          const groupedLostMonitors = lostMonitors.reduce((acc, monitor) => {
+            const prevLocation = monitor.previous || UNKNOWN_VALUE;
+            if (!acc[prevLocation]) acc[prevLocation] = [];
+            acc[prevLocation].push(monitor);
+            return acc;
+          }, {});
+          const gridDiv = createEl('div', CSS_CLASSES.LOST_MONITORS_GRID);
+          Object.keys(groupedLostMonitors).sort().forEach(prevLocation => {
+            const locationCube = createEl('div', CSS_CLASSES.LOST_LOCATION_CUBE);
+            const locationNameDiv = createEl('div', CSS_CLASSES.LOST_LOCATION_NAME);
+            let prevLocationDisplay = prevLocation;
+            const prevLocationInfo = validLocations.get(prevLocation);
+            if (prevLocationInfo) {
+              prevLocationDisplay = `${prevLocationInfo.label} ${prevLocationInfo.name}`;
+            }
+            setText(locationNameDiv, `[이전] ${prevLocationDisplay}`);
+            locationCube.appendChild(locationNameDiv);
+            const monitorListDiv = createEl('div', CSS_CLASSES.LOST_MONITOR_LIST);
+            groupedLostMonitors[prevLocation].forEach(monitor => {
+              monitorListDiv.appendChild(createMonitorCubeElement(monitor, LOST_LOCATION_LABEL));
             });
-
-            appendChilds(sectionDiv, [gridDiv]);
-            appendChilds(floorPlanContainer, [sectionDiv]);
+            locationCube.appendChild(monitorListDiv);
+            gridDiv.appendChild(locationCube);
+          });
+          appendChilds(sectionDiv, [gridDiv]);
+          appendChilds(floorPlanContainer, [sectionDiv]);
         }
 
         function renderUI(monitorData) {
-            floorPlanContainer.innerHTML = '';
-
-            schoolLayoutData.forEach((floorData, index) => {
-                renderFloor(floorData, index, monitorData.monitorCounts, monitorData.monitorsByLocation, monitorData.monitorsCountPerFloor);
-                 if (index < schoolLayoutData.length - 1) {
-                    const divider = createEl('hr', CSS_CLASSES.SECTION_DIVIDER);
-                    floorPlanContainer.appendChild(divider);
-                 }
-            });
-
-            if (monitorData.lostMonitors.length > 0) {
-                const divider = createEl('hr', CSS_CLASSES.SECTION_DIVIDER);
-                floorPlanContainer.appendChild(divider);
-                renderLostSection(monitorData.lostMonitors);
+          floorPlanContainer.innerHTML = '';
+          schoolLayoutData.forEach((floorData, index) => {
+            renderFloor(floorData, index, monitorData.monitorCounts, monitorData.monitorsByLocation, monitorData.monitorsCountPerFloor);
+            if (index < schoolLayoutData.length - 1) {
+              const divider = createEl('hr', CSS_CLASSES.SECTION_DIVIDER);
+              floorPlanContainer.appendChild(divider);
             }
-
-            adjustRowHeights();
-            scaleLayout();
+          });
+          if (monitorData.lostMonitors.length > 0) {
+            const divider = createEl('hr', CSS_CLASSES.SECTION_DIVIDER);
+            floorPlanContainer.appendChild(divider);
+            renderLostSection(monitorData.lostMonitors);
+          }
+          adjustRowHeights();
+          scaleLayout();
         }
 
         function adjustRowHeights() {
           requestAnimationFrame(() => {
             const gridContainers = document.querySelectorAll(`.${CSS_CLASSES.GRID_CONTAINER}, .${CSS_CLASSES.LOST_MONITORS_GRID}`);
             const defaultMinHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cube-min-height')) || 60;
-
             gridContainers.forEach(grid => {
               let maxRow = 0;
               const rowElements = {};
-
               grid.querySelectorAll(`.${CSS_CLASSES.CUBE}[data-row], .${CSS_CLASSES.LOST_LOCATION_CUBE}`).forEach(cube => {
                 if (cube.classList.contains(CSS_CLASSES.LOST_LOCATION_CUBE)) {
-                    const rowKey = 'lost';
-                    if (!rowElements[rowKey]) rowElements[rowKey] = [];
-                    rowElements[rowKey].push(cube);
-                    maxRow = Math.max(maxRow, 1);
-                    return;
+                  const rowKey = 'lost';
+                  if (!rowElements[rowKey]) rowElements[rowKey] = [];
+                  rowElements[rowKey].push(cube);
+                  maxRow = Math.max(maxRow, 1);
+                  return;
                 }
-
                 const startRow = parseInt(cube.dataset.row, 10) || 0;
                 const rowSpan = parseInt(cube.style.gridRowEnd?.replace('span ', '')) || 1;
                 const endRow = startRow + rowSpan - 1;
-
                 for (let r = startRow; r <= endRow; r++) {
-                    const rowKey = r.toString();
-                    if (!rowElements[rowKey]) rowElements[rowKey] = [];
-                    rowElements[rowKey].push(cube);
+                  const rowKey = r.toString();
+                  if (!rowElements[rowKey]) rowElements[rowKey] = [];
+                  rowElements[rowKey].push(cube);
                 }
                 maxRow = Math.max(maxRow, endRow);
               });
-
               if (!maxRow) return;
-
               for (let r = 1; r <= maxRow; r++) {
                 const rowKey = r.toString();
                 const cubesInRow = rowElements[rowKey] || [];
                 if (cubesInRow.length === 0) continue;
-
                 let maxHeightInRow = defaultMinHeight;
                 cubesInRow.forEach(cube => {
                   cube.style.minHeight = '';
@@ -790,13 +884,17 @@
                   cube.style.minHeight = `${Math.max(maxHeightInRow, currentMinHeight, defaultMinHeight)}px`;
                 });
               }
-
-               const lostCubes = rowElements['lost'] || [];
-               if (lostCubes.length > 0) {
-                   let maxLostHeight = defaultMinHeight;
-                   lostCubes.forEach(cube => { cube.style.minHeight = ''; maxLostHeight = Math.max(maxLostHeight, cube.offsetHeight); });
-                   lostCubes.forEach(cube => { cube.style.minHeight = `${Math.max(maxLostHeight, defaultMinHeight)}px`; });
-               }
+              const lostCubes = rowElements['lost'] || [];
+              if (lostCubes.length > 0) {
+                let maxLostHeight = defaultMinHeight;
+                lostCubes.forEach(cube => {
+                  cube.style.minHeight = '';
+                  maxLostHeight = Math.max(maxLostHeight, cube.offsetHeight);
+                });
+                lostCubes.forEach(cube => {
+                  cube.style.minHeight = `${Math.max(maxLostHeight, defaultMinHeight)}px`;
+                });
+              }
             });
           });
         }
@@ -804,198 +902,209 @@
         function scaleLayout() {
           const container = document.getElementById(DOM_IDS.FLOOR_PLAN_CONTAINER);
           if (!container) return;
-
           container.style.transform = 'scale(1)';
           const containerWidth = container.scrollWidth;
           const windowWidth = window.innerWidth;
           const availableWidth = windowWidth - 40;
-
           let scale = 1;
           if (containerWidth > availableWidth) {
-              scale = availableWidth / containerWidth;
+            scale = availableWidth / containerWidth;
           }
           container.style.transform = `scale(${scale})`;
         }
 
         function debounce(func, wait) {
-             clearTimeout(resizeTimeout);
-             resizeTimeout = setTimeout(func, wait);
+          clearTimeout(resizeTimeout);
+          resizeTimeout = setTimeout(func, wait);
         }
 
         function showLoadingState(isLoading, message = "데이터 로딩 중...") {
-            setButtonDisabled(refreshButton, isLoading);
-            setButtonDisabled(downloadButton, isLoading);
-            if (isLoading) {
-                setText(loadingMessage, message);
-                showElement(loadingMessage);
-                hideElement(errorMessage);
-            } else {
-                hideElement(loadingMessage);
-            }
+          setButtonDisabled(refreshButton, isLoading);
+          setButtonDisabled(downloadButton, isLoading);
+          if (isLoading) {
+            setText(loadingMessage, message);
+            showElement(loadingMessage);
+            hideElement(errorMessage);
+          } else {
+            hideElement(loadingMessage);
+          }
         }
 
         function showError(message) {
-            setText(errorMessage, `오류 발생:\n${message}`);
-            showElement(errorMessage);
-            setButtonDisabled(downloadButton, true);
+          setText(errorMessage, `오류 발생:\n${message}`);
+          showElement(errorMessage);
+          setButtonDisabled(downloadButton, true);
         }
 
         function isPdfSupportedBrowser() {
-            const platform = navigator.platform.toLowerCase();
-            const userAgent = navigator.userAgent.toLowerCase();
-            const isWindowsOrMac = platform.startsWith('win') || platform.startsWith('mac');
-            const isChromeOrFirefox = userAgent.includes('chrome') || userAgent.includes('firefox');
-            const isMobile = /mobi|android|iphone|ipad|ipod/i.test(userAgent);
-            return isWindowsOrMac && isChromeOrFirefox && !isMobile;
+          const platform = navigator.platform.toLowerCase();
+          const userAgent = navigator.userAgent.toLowerCase();
+          const isWindowsOrMac = platform.startsWith('win') || platform.startsWith('mac');
+          const isChromeOrFirefox = userAgent.includes('chrome') || userAgent.includes('firefox');
+          const isMobile = /mobi|android|iphone|ipad|ipod/i.test(userAgent);
+          return isWindowsOrMac && isChromeOrFirefox && !isMobile;
         }
-        function setOverlayText(text) { setText(pdfOverlayText, text); }
-        function toggleOverlay(visible) { if (visible) pdfOverlay.classList.add(CSS_CLASSES.VISIBLE); else pdfOverlay.classList.remove(CSS_CLASSES.VISIBLE); }
-        function togglePdfMode(enable) {
-            setButtonDisabled(downloadButton, enable);
-            setButtonDisabled(refreshButton, enable);
-            toggleOverlay(enable);
 
-            if (enable) {
-                setOverlayText('PDF 생성 준비 중...');
-                document.body.classList.add(CSS_CLASSES.PDF_CAPTURE_MODE);
-                floorPlanContainer.style.transform = 'scale(1)';
-            } else {
-                document.body.classList.remove(CSS_CLASSES.PDF_CAPTURE_MODE);
-                scaleLayout();
-            }
+        function setOverlayText(text) {
+          setText(pdfOverlayText, text);
+        }
+
+        function toggleOverlay(visible) {
+          if (visible) pdfOverlay.classList.add(CSS_CLASSES.VISIBLE);
+          else pdfOverlay.classList.remove(CSS_CLASSES.VISIBLE);
+        }
+
+        function togglePdfMode(enable) {
+          setButtonDisabled(downloadButton, enable);
+          setButtonDisabled(refreshButton, enable);
+          toggleOverlay(enable);
+          if (enable) {
+            setOverlayText('PDF 생성 준비 중...');
+            document.body.classList.add(CSS_CLASSES.PDF_CAPTURE_MODE);
+            floorPlanContainer.style.transform = 'scale(1)';
+          } else {
+            document.body.classList.remove(CSS_CLASSES.PDF_CAPTURE_MODE);
+            scaleLayout();
+          }
         }
         async function captureSections(sections) {
-             const capturedCanvases = [];
-             const sectionDimensions = [];
-             setOverlayText(`레이아웃 캡처 중... (1/${sections.length})`);
-             for (let i = 0; i < sections.length; i++) {
-                 setOverlayText(`레이아웃 캡처 중... (${i + 1}/${sections.length})`);
-                 const section = sections[i];
-                 const canvas = await html2canvas(section, {
-                     scale: 3,
-                     useCORS: true,
-                     logging: false,
-                     backgroundColor: '#ffffff',
-                     windowWidth: section.scrollWidth,
-                     windowHeight: section.scrollHeight
-                 });
-                 capturedCanvases.push(canvas);
-                 sectionDimensions.push({ width: canvas.width / 3, height: canvas.height / 3 });
-             }
-             return { capturedCanvases, sectionDimensions };
-        }
-        function calcPdfScale(sectionDimensions, contentWidth, contentHeight) {
-            let optimalScale = 1.0;
-            sectionDimensions.forEach(dim => {
-                const widthScale = dim.width > 0 ? contentWidth / dim.width : 1.0;
-                const heightScale = dim.height > 0 ? contentHeight / dim.height : 1.0;
-                optimalScale = Math.min(optimalScale, widthScale, heightScale);
+          const capturedCanvases = [];
+          const sectionDimensions = [];
+          setOverlayText(`레이아웃 캡처 중... (1/${sections.length})`);
+          for (let i = 0; i < sections.length; i++) {
+            setOverlayText(`레이아웃 캡처 중... (${i + 1}/${sections.length})`);
+            const section = sections[i];
+            const canvas = await html2canvas(section, {
+              scale: 3,
+              useCORS: true,
+              logging: false,
+              backgroundColor: '#ffffff',
+              windowWidth: section.scrollWidth,
+              windowHeight: section.scrollHeight
             });
-            return optimalScale;
+            capturedCanvases.push(canvas);
+            sectionDimensions.push({
+              width: canvas.width / 3,
+              height: canvas.height / 3
+            });
+          }
+          return {
+            capturedCanvases,
+            sectionDimensions
+          };
         }
+
+        function calcPdfScale(sectionDimensions, contentWidth, contentHeight) {
+          let optimalScale = 1.0;
+          sectionDimensions.forEach(dim => {
+            const widthScale = dim.width > 0 ? contentWidth / dim.width : 1.0;
+            const heightScale = dim.height > 0 ? contentHeight / dim.height : 1.0;
+            optimalScale = Math.min(optimalScale, widthScale, heightScale);
+          });
+          return optimalScale;
+        }
+
         function addImagesToPdf(pdf, canvases, dimensions, optimalScale, config) {
-            const { margin, contentWidth, pageHeight, sectionGap } = config;
-            let currentPageHeightUsed = margin;
-            let isFirstSectionOnPage = true;
-
-            setOverlayText('PDF 페이지 생성 중...');
-            for (let i = 0; i < canvases.length; i++) {
-                const canvas = canvases[i];
-                const originalWidth = dimensions[i].width;
-                const originalHeight = dimensions[i].height;
-                const finalWidth = originalWidth * optimalScale;
-                const finalHeight = originalHeight * optimalScale;
-
-                const requiredHeight = (isFirstSectionOnPage ? 0 : sectionGap) + finalHeight;
-
-                if (!isFirstSectionOnPage && (currentPageHeightUsed + requiredHeight > pageHeight - margin)) {
-                    pdf.addPage();
-                    currentPageHeightUsed = margin;
-                    isFirstSectionOnPage = true;
-                }
-
-                let positionY = currentPageHeightUsed + (isFirstSectionOnPage ? 0 : sectionGap);
-                const positionX = margin + (contentWidth - finalWidth) / 2;
-
-                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', positionX, positionY, finalWidth, finalHeight);
-
-                currentPageHeightUsed = positionY + finalHeight;
-                isFirstSectionOnPage = false;
+          const {
+            margin,
+            contentWidth,
+            pageHeight,
+            sectionGap
+          } = config;
+          let currentPageHeightUsed = margin;
+          let isFirstSectionOnPage = true;
+          setOverlayText('PDF 페이지 생성 중...');
+          for (let i = 0; i < canvases.length; i++) {
+            const canvas = canvases[i];
+            const originalWidth = dimensions[i].width;
+            const originalHeight = dimensions[i].height;
+            const finalWidth = originalWidth * optimalScale;
+            const finalHeight = originalHeight * optimalScale;
+            const requiredHeight = (isFirstSectionOnPage ? 0 : sectionGap) + finalHeight;
+            if (!isFirstSectionOnPage && (currentPageHeightUsed + requiredHeight > pageHeight - margin)) {
+              pdf.addPage();
+              currentPageHeightUsed = margin;
+              isFirstSectionOnPage = true;
             }
+            let positionY = currentPageHeightUsed + (isFirstSectionOnPage ? 0 : sectionGap);
+            const positionX = margin + (contentWidth - finalWidth) / 2;
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', positionX, positionY, finalWidth, finalHeight);
+            currentPageHeightUsed = positionY + finalHeight;
+            isFirstSectionOnPage = false;
+          }
         }
-
         async function generatePDF() {
           if (!isPdfSupportedBrowser()) {
-              alert("PDF 다운로드 기능은 데스크탑 환경의 Chrome 또는 Firefox 브라우저에서만 원활하게 작동합니다.");
-              return;
+            alert("PDF 다운로드 기능은 데스크탑 환경의 Chrome 또는 Firefox 브라우저에서만 원활하게 작동합니다.");
+            return;
           }
-
           togglePdfMode(true);
           await new Promise(resolve => setTimeout(resolve, 100));
-
           try {
-            const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+            const pdf = new jsPDF({
+              orientation: 'p',
+              unit: 'mm',
+              format: 'a4'
+            });
             const pageWidth = pdf.internal.pageSize.getWidth();
             const pageHeight = pdf.internal.pageSize.getHeight();
             const margin = 10;
             const contentWidth = pageWidth - margin * 2;
             const contentHeight = pageHeight - margin * 2;
             const sectionGap = 5;
-
             const sections = Array.from(document.querySelectorAll(`.${CSS_CLASSES.FLOOR_SECTION}`));
             if (sections.length === 0) {
-                throw new Error("PDF로 변환할 내용이 없습니다.");
+              throw new Error("PDF로 변환할 내용이 없습니다.");
             }
-
-            const { capturedCanvases, sectionDimensions } = await captureSections(sections);
+            const {
+              capturedCanvases,
+              sectionDimensions
+            } = await captureSections(sections);
             const optimalScale = calcPdfScale(sectionDimensions, contentWidth, contentHeight);
-            addImagesToPdf(pdf, capturedCanvases, sectionDimensions, optimalScale, { margin, contentWidth, pageHeight, sectionGap });
-
+            addImagesToPdf(pdf, capturedCanvases, sectionDimensions, optimalScale, {
+              margin,
+              contentWidth,
+              pageHeight,
+              sectionGap
+            });
             setOverlayText('PDF 파일 저장 중...');
             pdf.save('부광고등학교_모니터_현황.pdf');
-
           } catch (error) {
-              console.error("PDF 생성 오류:", error);
-              showError(`PDF 생성 중 오류가 발생했습니다: ${error.message}`);
+            console.error("PDF 생성 오류:", error);
+            showError(`PDF 생성 중 오류가 발생했습니다: ${error.message}`);
           } finally {
-              togglePdfMode(false);
-              setTimeout(() => {
-                  setButtonDisabled(downloadButton, false);
-                  setButtonDisabled(refreshButton, false);
-              }, 500);
+            togglePdfMode(false);
+            setTimeout(() => {
+              setButtonDisabled(downloadButton, false);
+              setButtonDisabled(refreshButton, false);
+            }, 500);
           }
         }
-
         async function loadAndRenderAllData() {
-            showLoadingState(true, "레이아웃 데이터 로딩 중...");
-            floorPlanContainer.innerHTML = '';
-            hideElement(errorMessage);
-
-            try {
-                const rawLayoutData = await fetchSheetData(LAYOUT_SHEET_CSV_URL, '레이아웃');
-                schoolLayoutData = parseLayoutData(rawLayoutData);
-                if (schoolLayoutData.length === 0) {
-                    throw new Error("학교 레이아웃 데이터를 불러오지 못했습니다. 시트 형식을 확인하세요.");
-                }
-                buildValidLocations();
-
-                showLoadingState(true, "모니터 데이터 로딩 중...");
-                const rawMonitorData = await fetchSheetData(MONITOR_SHEET_CSV_URL, '모니터');
-                if (rawMonitorData.length === 0) {
-                    console.warn("모니터 시트 데이터가 비어있습니다.");
-                }
-
-                const monitorData = processMonitorData(rawMonitorData);
-
-                renderUI(monitorData);
-                setButtonDisabled(downloadButton, false);
-
-            } catch (error) {
-                console.error("데이터 로딩/처리 오류:", error);
-                showError(error.message);
-            } finally {
-                showLoadingState(false);
+          showLoadingState(true, "레이아웃 데이터 로딩 중...");
+          floorPlanContainer.innerHTML = '';
+          hideElement(errorMessage);
+          try {
+            const rawLayoutData = await fetchSheetData(LAYOUT_SHEET_CSV_URL, '레이아웃');
+            schoolLayoutData = parseLayoutData(rawLayoutData);
+            if (schoolLayoutData.length === 0) {
+              throw new Error("학교 레이아웃 데이터를 불러오지 못했습니다. 시트 형식을 확인하세요.");
             }
+            buildValidLocations();
+            showLoadingState(true, "모니터 데이터 로딩 중...");
+            const rawMonitorData = await fetchSheetData(MONITOR_SHEET_CSV_URL, '모니터');
+            if (rawMonitorData.length === 0) {
+              console.warn("모니터 시트 데이터가 비어있습니다.");
+            }
+            const monitorData = processMonitorData(rawMonitorData);
+            renderUI(monitorData);
+            setButtonDisabled(downloadButton, false);
+          } catch (error) {
+            console.error("데이터 로딩/처리 오류:", error);
+            showError(error.message);
+          } finally {
+            showLoadingState(false);
+          }
         }
 
         function initializeApp() {
@@ -1004,10 +1113,8 @@
           window.addEventListener('resize', () => debounce(scaleLayout, 250));
           loadAndRenderAllData();
         }
-
         initializeApp();
-
       })();
     </script>
-</body>
+  </body>
 </html>
