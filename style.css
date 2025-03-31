@@ -37,6 +37,9 @@
   --color-status-blue-bg: #BBDEFB;
   --color-status-blue-border: #90CAF9;
   --color-status-blue-text: #0D47A1;
+  --color-status-orange-bg: #FFE0B2;
+  --color-status-orange-border: #FFCC80;
+  --color-status-orange-text: #E65100;
   --color-loading-text: #6c757d;
   --color-error-text: #dc3545;
   --color-pdf-section-bg: #FFFFFF;
@@ -305,6 +308,7 @@ body {
 .monitor-cube.status-red { background-color: var(--color-status-red-bg); border-color: var(--color-status-red-border); color: var(--color-status-red-text); }
 .monitor-cube.status-yellow { background-color: var(--color-status-yellow-bg); border-color: var(--color-status-yellow-border); color: var(--color-status-yellow-text); }
 .monitor-cube.status-blue { background-color: var(--color-status-blue-bg); border-color: var(--color-status-blue-border); color: var(--color-status-blue-text); }
+.monitor-cube.status-orange { background-color: var(--color-status-orange-bg); border-color: var(--color-status-orange-border); color: var(--color-status-orange-text); }
 
 .monitor-cube:hover { filter: brightness(95%); }
 
@@ -355,4 +359,4 @@ body {
   gap: 3px;
   width: 100%;
   padding-top: 4px;
-} 
+}

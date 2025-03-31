@@ -7,8 +7,8 @@
     const SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit#gid=${MONITOR_SHEET_GID}`;
 
     const COL_INDEX_MONITOR = {
-      INSTALL_STATUS: 0, ID: 1, CURRENT_INFO: 2, CURRENT_LOCATION_NAME: 3,
-      PREVIOUS_LOCATION: 4, NOTES: 5
+      INSTALL_STATUS: 0, FORCE_ASSIGNED: 1, ID: 2, CURRENT_INFO: 3, CURRENT_LOCATION_NAME: 4,
+      PREVIOUS_LOCATION: 5, NOTES: 6
     };
     const COL_INDEX_LAYOUT = {
       FLOOR_LABEL: 0, GRID_COLUMNS: 1, ELEMENT_TYPE: 2, ELEMENT_NAME: 3,
@@ -35,6 +35,7 @@
       CUBE: 'cube', CORRIDOR: 'corridor', CUBE_NAME: 'cube-name', CUBE_NAME_TEXT: 'cube-name-text',
       MONITOR_LIST: 'monitor-list', MONITOR_CUBE: 'monitor-cube',
       STATUS_GREEN: 'status-green', STATUS_RED: 'status-red', STATUS_YELLOW: 'status-yellow', STATUS_BLUE: 'status-blue',
+      STATUS_ORANGE: 'status-orange',
       LOST_LOCATION_CUBE: 'lost-location-cube', LOST_LOCATION_NAME: 'lost-location-name',
       LOST_MONITOR_LIST: 'lost-monitor-list', SECTION_DIVIDER: 'section-divider',
       PDF_CAPTURE_MODE: 'pdf-capture-mode'
@@ -169,6 +170,7 @@
             }
             return {
               installStatus: normalizeValue(row[COL_INDEX_MONITOR.INSTALL_STATUS]).toUpperCase(),
+              isForceAssigned: normalizeValue(row[COL_INDEX_MONITOR.FORCE_ASSIGNED]).toUpperCase() === 'O',
               id: normalizeValue(row[COL_INDEX_MONITOR.ID]),
               current: normalizeValue(row[COL_INDEX_MONITOR.CURRENT_LOCATION_NAME]),
               previous: normalizeValue(row[COL_INDEX_MONITOR.PREVIOUS_LOCATION]),
@@ -237,8 +239,10 @@
         const previousIsUnknown = monitor.previous.toUpperCase() === STATUS.UNKNOWN;
         const previousIsEqual = monitor.previous === STATUS.EQUAL;
         const isNotInstalled = monitor.installStatus !== STATUS.INSTALLED;
+        const isForceAssigned = monitor.isForceAssigned === true;
 
         if (isNotInstalled) return CSS_CLASSES.STATUS_RED;
+        if (isForceAssigned) return CSS_CLASSES.STATUS_ORANGE;
         if (previousIsUnknown || currentIsUnknown) return CSS_CLASSES.STATUS_YELLOW;
         if (previousIsEqual && !currentIsUnknown) return CSS_CLASSES.STATUS_BLUE;
         if (!currentIsUnknown) return CSS_CLASSES.STATUS_GREEN;
@@ -264,6 +268,7 @@
 
           let alertMessage = `고유 번호: ${monitor.id}\n현재 위치: ${displayKey || monitor.current}\n이전 위치: ${previousLocationDisplay}`;
           if (monitor.installStatus !== STATUS.INSTALLED) alertMessage += `\n\n* 현재 사용중이지 않거나 사용 여부를 알 수 없는 모니터 입니다.`;
+          if (monitor.isForceAssigned) alertMessage += `\n\n* 관리자에 의해 강제 배정된 모니터 입니다.`;
           if (monitor.notes) alertMessage += `\n\n----------\n\n${monitor.notes.replace(/\n/g, ' ').replace("  ", " ")}`;
           alert(alertMessage);
         });
