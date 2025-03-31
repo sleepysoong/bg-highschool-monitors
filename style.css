@@ -148,7 +148,6 @@ body {
 
 #section-lost {
    width: auto;
-   max-width: calc(930px + 44px);
    margin-left: auto;
    margin-right: auto;
 }
@@ -186,6 +185,7 @@ body {
   padding: 2px !important;
   max-width: none !important;
   margin: 0 !important;
+  grid-template-columns: auto !important;
 }
 .pdf-capture-mode .cube {
   background-color: var(--color-pdf-cube-bg) !important;
@@ -239,9 +239,15 @@ body {
 }
 
 .lost-monitors-grid {
-  grid-template-columns: repeat(9, 100px);
+  display: grid;
+  gap: var(--grid-gap);
+  border: 1px solid var(--color-grid-border);
+  border-radius: var(--section-border-radius);
+  background-color: var(--color-grid-bg);
+  padding: var(--grid-gap);
   max-width: 930px;
   margin: 0 auto;
+  grid-auto-rows: minmax(var(--cube-min-height), auto);
 }
 
 .cube {

@@ -268,7 +268,7 @@
 
           let alertMessage = `고유 번호: ${monitor.id}\n현재 위치: ${displayKey || monitor.current}\n이전 위치: ${previousLocationDisplay}`;
           if (monitor.installStatus !== STATUS.INSTALLED) alertMessage += `\n\n* 현재 사용중이지 않거나 사용 여부를 알 수 없는 모니터 입니다.`;
-          if (monitor.isForceAssigned) alertMessage += `\n\n* 관리자에 의해 강제 배정된 모니터 입니다.`;
+          if (monitor.isForceAssigned) alertMessage += `\n\n* 고유번호가 임의로 배정된 모니터 입니다.`;
           if (monitor.notes) alertMessage += `\n\n----------\n\n${monitor.notes.replace(/\n/g, ' ').replace("  ", " ")}`;
           alert(alertMessage);
         });
@@ -341,8 +341,29 @@
             acc[prevLocation].push(monitor);
             return acc;
         }, {});
+        
+        // 사라진 모니터 그룹의 수에 따라 컬럼 수 계산
+        const groupCount = Object.keys(groupedLostMonitors).length;
+        // 그룹 개수가 9보다 적으면 그룹 개수만큼, 9 이상이면 최대 9개 컬럼 사용
+        const columnCount = Math.min(groupCount, 9);
 
         const gridDiv = createEl('div', CSS_CLASSES.LOST_MONITORS_GRID);
+        // 그리드 컬럼 수 동적 설정
+        gridDiv.style.setProperty('--lost-cols', columnCount);
+        gridDiv.style.gridTemplateColumns = `repeat(${columnCount}, 100px)`;
+        
+        // 섹션 div의 너비를 컬럼 수에 맞게 조정
+        const columnWidth = 100; // 각 열의 너비
+        const gapWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--grid-gap')) || 3; // 간격
+        const paddingWidth = (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--grid-gap')) || 3) * 2; // 양쪽 패딩
+        const borderWidth = 2; // 테두리 너비 2px (왼쪽 1px + 오른쪽 1px)
+        
+        // 전체 그리드 너비 계산: 열 너비 * 열 수 + 간격 * (열 수 - 1) + 패딩 + 테두리
+        const gridTotalWidth = (columnWidth * columnCount) + (gapWidth * (columnCount - 1)) + paddingWidth + borderWidth;
+        
+        // 섹션에 적용할 최대 너비 (섹션 패딩 고려)
+        const sectionPadding = 44; // 양쪽 22px + 22px
+        sectionDiv.style.maxWidth = `${gridTotalWidth + sectionPadding}px`;
 
         Object.keys(groupedLostMonitors).sort().forEach(prevLocation => {
             const locationCube = createEl('div', CSS_CLASSES.LOST_LOCATION_CUBE);
