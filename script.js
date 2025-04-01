@@ -292,6 +292,14 @@
         const monitorsInRoom = monitorsByLocation[displayKey];
         if (monitorsInRoom?.length > 0) {
           const monitorListDiv = createEl('div', CSS_CLASSES.MONITOR_LIST);
+          
+          // 방의 크기(colSpan)에 따라 모니터 그리드 열 수 조정
+          // colSpan이 클수록 더 많은 열을 표시
+          const colSpan = roomData.colSpan || 1;
+          // 모니터 하나당 약 90px 너비를 고려, 100px 셀 너비 기준으로 몇 개 들어갈지 계산
+          const adjustedColumns = Math.max(1, Math.min(4, colSpan));
+          monitorListDiv.style.gridTemplateColumns = `repeat(${adjustedColumns}, 1fr)`;
+          
           monitorsInRoom.forEach(monitor => {
             monitorListDiv.appendChild(createMonitorCubeElement(monitor, displayKey));
           });
@@ -378,6 +386,10 @@
             locationCube.appendChild(locationNameDiv);
 
             const monitorListDiv = createEl('div', CSS_CLASSES.LOST_MONITOR_LIST);
+            // 사라진 모니터도 가로 배치 적용
+            monitorListDiv.style.display = 'grid';
+            monitorListDiv.style.gridTemplateColumns = 'repeat(auto-fill, minmax(90px, 1fr))';
+            
             groupedLostMonitors[prevLocation].forEach(monitor => {
                 monitorListDiv.appendChild(createMonitorCubeElement(monitor, LOST_LOCATION_LABEL));
             });
@@ -529,9 +541,24 @@
             setOverlayText('PDF 생성 준비 중...');
             document.body.classList.add(CSS_CLASSES.PDF_CAPTURE_MODE);
             floorPlanContainer.style.transform = 'scale(1)';
+            
+            // PDF 모드에서도 그리드 레이아웃 유지
+            document.querySelectorAll(`.${CSS_CLASSES.MONITOR_LIST}, .${CSS_CLASSES.LOST_MONITOR_LIST}`).forEach(list => {
+                if (list.style.gridTemplateColumns) {
+                    list.dataset.originalColumns = list.style.gridTemplateColumns;
+                }
+            });
         } else {
             document.body.classList.remove(CSS_CLASSES.PDF_CAPTURE_MODE);
             scaleLayout();
+            
+            // 원래 그리드 레이아웃 복원
+            document.querySelectorAll(`.${CSS_CLASSES.MONITOR_LIST}, .${CSS_CLASSES.LOST_MONITOR_LIST}`).forEach(list => {
+                if (list.dataset.originalColumns) {
+                    list.style.gridTemplateColumns = list.dataset.originalColumns;
+                    delete list.dataset.originalColumns;
+                }
+            });
         }
     }
     async function captureSections(sections) {
