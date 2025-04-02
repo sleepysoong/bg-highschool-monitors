@@ -6,9 +6,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>부광고등학교 모니터 조사</title>
     <link rel="icon" href="bg.ico" type="image/x-icon">
+    <!-- 폰트 미리 로드 -->
+    <link rel="preload" href="https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-9Black.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://fastly.jsdelivr.net/gh/projectnoonnu/2408@1.0/goorm-sans-bold.woff2" as="font" type="font/woff2" crossorigin>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* 폰트가 로드되기 전 텍스트가 보이지 않는 문제 방지 */
+        body {
+            font-family: Arial, sans-serif;
+            visibility: visible;
+        }
+        body.fonts-loaded {
+            font-family: 'goorm-sans-bold', Arial, sans-serif;
+        }
+        /* PDF 캡처 시 폰트 설정 */
+        .pdf-capture-mode body,
+        .pdf-capture-mode .cube,
+        .pdf-capture-mode .monitor-cube,
+        .pdf-capture-mode .cube-name-text {
+            font-family: 'goorm-sans-bold', Arial, sans-serif !important;
+        }
+        
+        .pdf-capture-mode .section-label {
+            font-family: 'Freesentation-9Black', Arial, sans-serif !important;
+        }
+    </style>
+    <script>
+        // 폰트 로드 확인 및 문서 준비
+        document.addEventListener('DOMContentLoaded', function() {
+            // 폰트 로드 완료 확인
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(() => {
+                    document.body.classList.add('fonts-loaded');
+                    console.log('웹 폰트 로드 완료');
+                    
+                    // 폰트 정보 출력
+                    const fontGoorm = new FontFace('goorm-sans-bold', 'url(https://fastly.jsdelivr.net/gh/projectnoonnu/2408@1.0/goorm-sans-bold.woff2)');
+                    const fontFree = new FontFace('Freesentation-9Black', 'url(https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-9Black.woff2)');
+                    
+                    document.fonts.add(fontGoorm);
+                    document.fonts.add(fontFree);
+                });
+            } else {
+                // 폰트 API를 지원하지 않는 브라우저를 위한 폴백
+                setTimeout(() => {
+                    document.body.classList.add('fonts-loaded');
+                    console.log('폰트 API 지원 안함 - 타임아웃으로 폰트 로드 처리');
+                }, 1000);
+            }
+        });
+    </script>
 </head>
 
 <body>

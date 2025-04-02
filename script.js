@@ -251,6 +251,7 @@
 
     function createMonitorCubeElement(monitor, displayKey) {
         const monitorCubeDiv = createEl('div', CSS_CLASSES.MONITOR_CUBE);
+        monitorCubeDiv.style.outline = 'none';
         const displayId = monitor.installStatus !== STATUS.INSTALLED ? `[X] ${monitor.id}` : monitor.id;
         setText(monitorCubeDiv, displayId);
         monitorCubeDiv.title = monitor.id;
@@ -268,7 +269,7 @@
 
           let alertMessage = `고유 번호: ${monitor.id}\n현재 위치: ${displayKey || monitor.current}\n이전 위치: ${previousLocationDisplay}`;
           if (monitor.installStatus !== STATUS.INSTALLED) alertMessage += `\n\n* 현재 사용중이지 않거나 사용 여부를 알 수 없는 모니터 입니다.`;
-          if (monitor.isForceAssigned) alertMessage += `\n\n* 고유번호가 임의로 배정된 모니터 입니다.`;
+          if (monitor.isForceAssigned) alertMessage += `\n\n* 관리자에 의해 강제 배정된 모니터 입니다.`;
           if (monitor.notes) alertMessage += `\n\n----------\n\n${monitor.notes.replace(/\n/g, ' ').replace("  ", " ")}`;
           alert(alertMessage);
         });
@@ -548,6 +549,36 @@
                     list.dataset.originalColumns = list.style.gridTemplateColumns;
                 }
             });
+            
+            // Corridor 요소들이 PDF에서 확실히 보이도록 스타일 강제 적용
+            document.querySelectorAll(`.${CSS_CLASSES.CORRIDOR}`).forEach(corridor => {
+                corridor.style.visibility = 'visible';
+                corridor.style.display = 'flex';
+                corridor.style.opacity = '1';
+                corridor.style.minWidth = '100px';
+                corridor.style.minHeight = '60px';
+                corridor.style.border = '2px dashed #aaaaaa';
+                corridor.dataset.pdfModified = 'true';
+            });
+            
+            // 일반 큐브 요소들도 확실히 보이도록 설정
+            document.querySelectorAll(`.${CSS_CLASSES.CUBE}:not(.${CSS_CLASSES.CORRIDOR})`).forEach(cube => {
+                cube.style.visibility = 'visible';
+                cube.style.display = 'flex';
+                cube.style.opacity = '1';
+                cube.style.minWidth = '100px';
+                cube.style.minHeight = '60px';
+                cube.dataset.pdfModified = 'true';
+            });
+            
+            // 그리드 컨테이너도 보이도록 설정
+            document.querySelectorAll(`.${CSS_CLASSES.GRID_CONTAINER}, .${CSS_CLASSES.LOST_MONITORS_GRID}`).forEach(grid => {
+                grid.style.visibility = 'visible';
+                grid.style.display = 'grid';
+                grid.style.opacity = '1';
+                grid.style.minWidth = '300px';
+                grid.dataset.pdfModified = 'true';
+            });
         } else {
             document.body.classList.remove(CSS_CLASSES.PDF_CAPTURE_MODE);
             scaleLayout();
@@ -559,36 +590,279 @@
                     delete list.dataset.originalColumns;
                 }
             });
+            
+            // PDF를 위해 수정된 스타일 복원
+            document.querySelectorAll('[data-pdf-modified="true"]').forEach(el => {
+                el.style.visibility = '';
+                el.style.display = '';
+                el.style.opacity = '';
+                el.style.minWidth = '';
+                el.style.minHeight = '';
+                el.style.border = '';
+                delete el.dataset.pdfModified;
+            });
         }
     }
     async function captureSections(sections) {
          const capturedCanvases = [];
          const sectionDimensions = [];
          setOverlayText(`레이아웃 캡처 중... (1/${sections.length})`);
+         
+         // html2canvas 옵션 설정
+         const html2canvasOptions = {
+             scale: 3, // 고품질 캡처
+             useCORS: true,
+             logging: false,
+             backgroundColor: '#ffffff',
+             allowTaint: true,
+             letterRendering: true,
+             removeContainer: false,
+             ignoreElements: element => false, // 모든 요소 포함
+             onclone: (document, clone) => {
+                 // 클론된 문서의 모든 텍스트 내용이 제대로 보이도록 설정
+                 const allElements = clone.querySelectorAll('*');
+                 allElements.forEach(el => {
+                     if (el.style) {
+                        el.style.fontFamily = "'goorm-sans-bold', Arial, sans-serif";
+                        el.style.visibility = 'visible';
+                        el.style.opacity = '1';
+                     }
+                 });
+                
+                 // 클론에서 모든 큐브 이름과 모니터 ID 등의 텍스트가 보이도록 확인
+                 const textElements = clone.querySelectorAll('.cube-name-text, .monitor-cube, .section-label, .lost-location-name');
+                 textElements.forEach(el => {
+                     el.style.fontFamily = "'goorm-sans-bold', Arial, sans-serif";
+                     el.style.visibility = 'visible';
+                     el.style.opacity = '1';
+                     el.style.display = 'block';
+                     el.style.color = '#000000';
+                     
+                     // 텍스트가 너무 작지 않도록 조정
+                     if (el.classList.contains('cube-name-text')) {
+                         el.style.fontSize = '14px';
+                         el.style.fontWeight = 'bold';
+                         el.style.textShadow = '0px 0px 1px #ffffff';
+                     } else if (el.classList.contains('monitor-cube')) {
+                         el.style.fontSize = '12px';
+                         el.style.fontWeight = 'bold';
+                         el.style.border = 'none'; // 테두리 제거
+                         el.style.boxShadow = 'none'; // 그림자 제거
+                         
+                         // 상태 클래스에 따른 스타일 강화 (테두리 없이)
+                         if (el.classList.contains('status-green')) {
+                             el.style.backgroundColor = '#E8F5E9';
+                             el.style.border = 'none';
+                             el.style.color = '#1B5E20';
+                         } else if (el.classList.contains('status-red')) {
+                             el.style.backgroundColor = '#FFEBEE';
+                             el.style.border = 'none';
+                             el.style.color = '#B71C1C';
+                         } else if (el.classList.contains('status-yellow')) {
+                             el.style.backgroundColor = '#FFFDE7';
+                             el.style.border = 'none';
+                             el.style.color = '#F57F17';
+                         } else if (el.classList.contains('status-blue')) {
+                             el.style.backgroundColor = '#E3F2FD';
+                             el.style.border = 'none';
+                             el.style.color = '#0D47A1';
+                         } else if (el.classList.contains('status-orange')) {
+                             el.style.backgroundColor = '#FFF3E0';
+                             el.style.border = 'none';
+                             el.style.color = '#E65100';
+                         }
+                     }
+                 });
+                 
+                 // 레이블(제목)도 확실히 보이게 설정
+                 const labels = clone.querySelectorAll('.section-label');
+                 labels.forEach(label => {
+                     label.style.fontSize = '24px';
+                     label.style.fontWeight = 'bold';
+                     label.style.marginBottom = '15px';
+                     label.style.textAlign = 'center';
+                     label.style.color = '#000000';
+                     label.style.fontFamily = "'Freesentation-9Black', Arial, sans-serif";
+                     label.style.letterSpacing = 'normal';
+                 });
+                 
+                 // 내용이 잘 보이도록 텍스트만 강조
+                 const monitorCubes = clone.querySelectorAll('.monitor-cube');
+                 monitorCubes.forEach(cube => {
+                     cube.style.textShadow = '0 0 1px white';
+                     cube.style.boxShadow = 'none';
+                     cube.style.border = 'none';
+                 });
+                 
+                 // 교실 이름도 확실히 보이게 설정
+                 const lostLocationNames = clone.querySelectorAll('.lost-location-name');
+                 lostLocationNames.forEach(name => {
+                     name.style.fontWeight = 'bold';
+                     name.style.fontSize = '12px';
+                     name.style.color = '#000000';
+                     name.style.textShadow = '0 0 1px white';
+                 });
+             }
+         };
+         
+         // 모든 섹션에 캡처 전 스타일 적용
+         sections.forEach(section => {
+             section.style.visibility = 'visible';
+             section.style.opacity = '1';
+             section.style.display = 'block';
+             
+             // 섹션 내 모든 텍스트 요소가 잘 보이도록 설정
+             const textElements = section.querySelectorAll('.cube-name-text, .monitor-cube, .section-label, .lost-location-name');
+             textElements.forEach(el => {
+                 el.style.visibility = 'visible';
+                 el.style.opacity = '1';
+                 el.dataset.originalDisplay = el.style.display || '';
+                 el.style.display = el.tagName === 'SPAN' ? 'inline-block' : 'block';
+             });
+             
+             // 모니터 박스 테두리 제거
+             const monitorBoxes = section.querySelectorAll('.monitor-cube');
+             monitorBoxes.forEach(box => {
+                 box.dataset.originalBorder = box.style.border || '';
+                 box.dataset.originalBoxShadow = box.style.boxShadow || '';
+                 box.style.border = 'none';
+                 box.style.boxShadow = 'none';
+             });
+             
+             // corridor 요소들도 확인
+             const corridors = section.querySelectorAll(`.${CSS_CLASSES.CORRIDOR}`);
+             corridors.forEach(corridor => {
+                 corridor.style.visibility = 'visible';
+                 corridor.style.display = 'flex';
+                 corridor.style.border = '3px dashed #777777';
+             });
+             
+             // 그리드 요소들이 제대로 표시되는지 확인
+             const grids = section.querySelectorAll(`.${CSS_CLASSES.GRID_CONTAINER}, .${CSS_CLASSES.LOST_MONITORS_GRID}`);
+             grids.forEach(grid => {
+                 grid.style.visibility = 'visible';
+                 grid.style.display = 'grid';
+             });
+         });
+         
+         // 강제로 레이아웃 재계산 수행
+         document.body.offsetHeight;
+         
+         // 렌더링 안정화를 위한 대기
+         await new Promise(resolve => setTimeout(resolve, 800));
+         
+         // 각 섹션 캡처
          for (let i = 0; i < sections.length; i++) {
              setOverlayText(`레이아웃 캡처 중... (${i + 1}/${sections.length})`);
              const section = sections[i];
-             const canvas = await html2canvas(section, {
-                 scale: 3,
-                 useCORS: true,
-                 logging: false,
-                 backgroundColor: '#ffffff',
-                 windowWidth: section.scrollWidth,
-                 windowHeight: section.scrollHeight
-             });
-             capturedCanvases.push(canvas);
-             sectionDimensions.push({ width: canvas.width / 3, height: canvas.height / 3 });
+             
+             // 추가 옵션 설정 - 섹션별 크기 조정
+             const options = {
+                 ...html2canvasOptions,
+                 windowWidth: section.scrollWidth + 100,
+                 windowHeight: section.scrollHeight + 100
+             };
+             
+             // 캡처 직전 잠시 대기
+             await new Promise(resolve => setTimeout(resolve, 200));
+             
+             // 캡처 수행
+             try {
+                 const canvas = await html2canvas(section, options);
+                 capturedCanvases.push(canvas);
+                 sectionDimensions.push({ width: canvas.width / 3, height: canvas.height / 3 });
+             } catch (error) {
+                 console.error('섹션 캡처 중 오류:', error);
+                 // 오류가 발생해도 계속 진행
+                 const placeholder = document.createElement('canvas');
+                 placeholder.width = 300 * 3;
+                 placeholder.height = 200 * 3;
+                 const ctx = placeholder.getContext('2d');
+                 ctx.fillStyle = '#ffffff';
+                 ctx.fillRect(0, 0, placeholder.width, placeholder.height);
+                 ctx.fillStyle = '#ff0000';
+                 ctx.font = '30px sans-serif';
+                 ctx.fillText(`섹션 ${i+1} 캡처 실패`, 50, 100);
+                 capturedCanvases.push(placeholder);
+                 sectionDimensions.push({ width: 300, height: 200 });
+             }
          }
+         
+         // 원래 스타일로 복원
+         sections.forEach(section => {
+             const textElements = section.querySelectorAll('[data-original-display]');
+             textElements.forEach(el => {
+                 el.style.display = el.dataset.originalDisplay;
+                 delete el.dataset.originalDisplay;
+             });
+             
+             // 모니터 박스 스타일 복원
+             const monitorBoxes = section.querySelectorAll('.monitor-cube');
+             monitorBoxes.forEach(box => {
+                 if (box.dataset.originalBorder !== undefined) {
+                     box.style.border = box.dataset.originalBorder;
+                     delete box.dataset.originalBorder;
+                 }
+                 if (box.dataset.originalBoxShadow !== undefined) {
+                     box.style.boxShadow = box.dataset.originalBoxShadow;
+                     delete box.dataset.originalBoxShadow;
+                 }
+             });
+             
+             // corridor 스타일 복원
+             const corridors = section.querySelectorAll(`.${CSS_CLASSES.CORRIDOR}`);
+             corridors.forEach(corridor => {
+                 corridor.style.border = '';
+             });
+         });
+         
          return { capturedCanvases, sectionDimensions };
     }
     function calcPdfScale(sectionDimensions, contentWidth, contentHeight) {
-        let optimalScale = 1.0;
-        sectionDimensions.forEach(dim => {
-            const widthScale = dim.width > 0 ? contentWidth / dim.width : 1.0;
-            const heightScale = dim.height > 0 ? contentHeight / dim.height : 1.0;
-            optimalScale = Math.min(optimalScale, widthScale, heightScale);
+        let maxWidthSection = { width: 0, height: 0, index: -1 };
+        let maxHeightSection = { width: 0, height: 0, index: -1 };
+
+        // 모든 섹션 중에서 가장 넓은 섹션과 가장 높은 섹션 찾기
+        sectionDimensions.forEach((dim, index) => {
+            if (dim.width > maxWidthSection.width) {
+                maxWidthSection = { ...dim, index };
+            }
+            if (dim.height > maxHeightSection.height) {
+                maxHeightSection = { ...dim, index };
+            }
         });
-        return optimalScale;
+
+        // 유효한 섹션 크기가 없으면 기본 스케일 반환
+        if (maxWidthSection.width === 0 || maxHeightSection.height === 0) {
+            console.warn("유효한 섹션 크기를 찾을 수 없습니다. 기본 스케일 1.0 반환.");
+            return 1.0;
+        }
+
+        // 1. 가장 넓은 섹션이 용지에 맞도록 하는 최대 스케일 계산
+        //    (가로, 세로 비율 모두 고려하여 용지 콘텐츠 영역 안에 들어가야 함)
+        const scaleForMaxWidthSectionFitW = contentWidth / maxWidthSection.width;
+        const scaleForMaxWidthSectionFitH = contentHeight / maxWidthSection.height;
+        const scaleForMaxWidthSection = Math.min(scaleForMaxWidthSectionFitW, scaleForMaxWidthSectionFitH);
+
+        // 2. 가장 높은 섹션이 용지에 맞도록 하는 최대 스케일 계산
+        //    (가로, 세로 비율 모두 고려하여 용지 콘텐츠 영역 안에 들어가야 함)
+        const scaleForMaxHeightSectionFitW = contentWidth / maxHeightSection.width;
+        const scaleForMaxHeightSectionFitH = contentHeight / maxHeightSection.height;
+        const scaleForMaxHeightSection = Math.min(scaleForMaxHeightSectionFitW, scaleForMaxHeightSectionFitH);
+
+        // 3. 두 스케일 중 더 작은 값을 최종 스케일로 선택
+        //    이렇게 해야 가장 넓은 섹션과 가장 높은 섹션 모두 용지 안에 들어감
+        const finalScale = Math.min(scaleForMaxWidthSection, scaleForMaxHeightSection);
+
+        console.log(`PDF 스케일 계산:`);
+        console.log(` - 용지 콘텐츠 영역: ${contentWidth.toFixed(1)}mm x ${contentHeight.toFixed(1)}mm`);
+        console.log(` - 가장 넓은 섹션 (${maxWidthSection.index}): ${maxWidthSection.width.toFixed(1)}x${maxWidthSection.height.toFixed(1)}, 필요 스케일 <= ${scaleForMaxWidthSection.toFixed(3)}`);
+        console.log(` - 가장 높은 섹션 (${maxHeightSection.index}): ${maxHeightSection.width.toFixed(1)}x${maxHeightSection.height.toFixed(1)}, 필요 스케일 <= ${scaleForMaxHeightSection.toFixed(3)}`);
+        console.log(` - 최종 선택된 스케일: ${finalScale.toFixed(3)}`);
+
+        // 기존의 추가 여백(0.9 곱하기)이나 최소 스케일 제한(0.65)은 사용하지 않음
+        // 필요하다면 여기에 로직을 추가할 수 있습니다. 예: finalScale * 0.95
+        return finalScale;
     }
     function addImagesToPdf(pdf, canvases, dimensions, optimalScale, config) {
         const { margin, contentWidth, pageHeight, sectionGap } = config;
@@ -605,18 +879,22 @@
 
             const requiredHeight = (isFirstSectionOnPage ? 0 : sectionGap) + finalHeight;
 
+            // 새 페이지가 필요한지 확인
             if (!isFirstSectionOnPage && (currentPageHeightUsed + requiredHeight > pageHeight - margin)) {
                 pdf.addPage();
                 currentPageHeightUsed = margin;
                 isFirstSectionOnPage = true;
             }
 
+            // 중앙 정렬을 위한 X 위치 계산
             let positionY = currentPageHeightUsed + (isFirstSectionOnPage ? 0 : sectionGap);
             const positionX = margin + (contentWidth - finalWidth) / 2;
 
             pdf.addImage(canvas.toDataURL('image/png'), 'PNG', positionX, positionY, finalWidth, finalHeight);
 
+            // 페이지 내 다음 섹션을 위한 위치 업데이트
             currentPageHeightUsed = positionY + finalHeight;
+            
             isFirstSectionOnPage = false;
         }
     }
@@ -628,28 +906,201 @@
       }
 
       togglePdfMode(true);
-      await new Promise(resolve => setTimeout(resolve, 100));
-
+      
       try {
+        // 레이아웃이 완전히 적용될 수 있도록 더 긴 대기 시간
+        setOverlayText('PDF 레이아웃 준비 중...');
+        
+        // 웹 폰트가 로드되었는지 확인
+        await new Promise(resolve => {
+          if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(() => {
+              console.log('폰트 로드 완료');
+              resolve();
+            });
+          } else {
+            setTimeout(resolve, 1000); // 폰트 로드를 위한 대기 시간
+          }
+        });
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const isLandscape = orientation === 'l';
         const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
         const margin = 10;
         const contentWidth = pageWidth - margin * 2;
         const contentHeight = pageHeight - margin * 2;
-        const sectionGap = 5;
+        const sectionGap = 15; // 구분선 포함 여백 늘림
 
         const sections = Array.from(document.querySelectorAll(`.${CSS_CLASSES.FLOOR_SECTION}`));
         if (sections.length === 0) {
             throw new Error("PDF로 변환할 내용이 없습니다.");
         }
+        
+        // 모니터 상태 색상 정보 가져오기
+        const statusColors = getStatusColors();
+        
+        // 모든 모니터 요소의 내용이 잘 보이도록 텍스트 색상 강조
+        const allMonitors = document.querySelectorAll(`.${CSS_CLASSES.MONITOR_CUBE}`);
+        allMonitors.forEach(monitor => {
+            monitor.dataset.originalColor = monitor.style.color || '';
+            monitor.dataset.originalBorder = monitor.style.border || '';
+            monitor.dataset.originalBoxShadow = monitor.style.boxShadow || '';
+            
+            monitor.style.color = '#000000';
+            monitor.style.fontWeight = 'bold';
+            monitor.style.border = 'none';
+            monitor.style.boxShadow = 'none';
+            
+            // 상태별 색상 강화 (테두리 없이)
+            if (monitor.classList.contains('status-green')) {
+                monitor.style.backgroundColor = statusColors.green.bg;
+                monitor.style.border = 'none';
+                monitor.style.color = statusColors.green.text;
+            } else if (monitor.classList.contains('status-red')) {
+                monitor.style.backgroundColor = statusColors.red.bg;
+                monitor.style.border = 'none';
+                monitor.style.color = statusColors.red.text;
+            } else if (monitor.classList.contains('status-yellow')) {
+                monitor.style.backgroundColor = statusColors.yellow.bg;
+                monitor.style.border = 'none';
+                monitor.style.color = statusColors.yellow.text;
+            } else if (monitor.classList.contains('status-blue')) {
+                monitor.style.backgroundColor = statusColors.blue.bg;
+                monitor.style.border = 'none';
+                monitor.style.color = statusColors.blue.text;
+            } else if (monitor.classList.contains('status-orange')) {
+                monitor.style.backgroundColor = statusColors.orange.bg;
+                monitor.style.border = 'none';
+                monitor.style.color = statusColors.orange.text;
+            }
+        });
+        
+        // 모든 방 이름 요소의 내용이 잘 보이도록 강조
+        const allRoomNames = document.querySelectorAll(`.${CSS_CLASSES.CUBE_NAME_TEXT}`);
+        allRoomNames.forEach(roomName => {
+            roomName.dataset.originalStyle = roomName.getAttribute('style') || '';
+            roomName.style.color = '#000000';
+            roomName.style.fontWeight = 'bold';
+            roomName.style.fontSize = '14px';
+            roomName.style.textShadow = '0px 0px 1px #ffffff';
+            roomName.style.fontFamily = "'goorm-sans-bold', Arial, sans-serif";
+        });
+        
+        // 교실 이름 강조
+        const allLocationNames = document.querySelectorAll(`.${CSS_CLASSES.LOST_LOCATION_NAME}`);
+        allLocationNames.forEach(name => {
+            name.dataset.originalStyle = name.getAttribute('style') || '';
+            name.style.color = '#000000';
+            name.style.fontWeight = 'bold';
+            name.style.fontSize = '12px';
+            name.style.fontFamily = "'goorm-sans-bold', Arial, sans-serif";
+        });
+        
+        // 층 제목 스타일 적용
+        const allSectionLabels = document.querySelectorAll(`.${CSS_CLASSES.SECTION_LABEL}`);
+        allSectionLabels.forEach(label => {
+            label.dataset.originalStyle = label.getAttribute('style') || '';
+            label.style.color = '#000000';
+            label.style.fontWeight = 'bold';
+            label.style.fontSize = '24px';
+            label.style.fontFamily = "'Freesentation-9Black', Arial, sans-serif";
+        });
+        
+        // PDF 캡처 전 레이아웃 강제 재계산
+        setOverlayText('레이아웃 최적화 중...');
+
+        // 전체 컨테이너를 강제로 다시 그리기
+        floorPlanContainer.style.opacity = '0.99';
+        floorPlanContainer.offsetHeight; // 강제 리플로우
+        floorPlanContainer.style.opacity = '1';
+        
+        // 모든 섹션과 그리드 요소들을 강제로 다시 그리기
+        sections.forEach(section => {
+            // 각 섹션을 잠시 숨겼다가 다시 표시
+            section.style.display = 'none';
+            section.offsetHeight; // 강제 리플로우
+            section.style.display = '';
+            
+            // 그리드 컨테이너 내부의 요소들도 재계산
+            const grids = section.querySelectorAll(`.${CSS_CLASSES.GRID_CONTAINER}, .${CSS_CLASSES.LOST_MONITORS_GRID}`);
+            grids.forEach(grid => {
+                // Corridor와 큐브 요소들 확인
+                const corridors = grid.querySelectorAll(`.${CSS_CLASSES.CORRIDOR}`);
+                corridors.forEach(corridor => {
+                    corridor.style.visibility = 'visible';
+                    corridor.style.display = 'flex';
+                    corridor.style.minHeight = '60px';
+                    corridor.style.minWidth = '100px';
+                });
+                
+                // 모든 큐브 요소 표시 확인
+                const cubes = grid.querySelectorAll(`.${CSS_CLASSES.CUBE}`);
+                cubes.forEach(cube => {
+                    cube.style.visibility = 'visible';
+                    cube.style.minWidth = '100px';
+                });
+            });
+        });
+        
+        // 레이아웃 안정화를 위한 추가 대기
+        await new Promise(resolve => setTimeout(resolve, 800));
 
         const { capturedCanvases, sectionDimensions } = await captureSections(sections);
+        
+        // 원래 스타일 복원
+        allMonitors.forEach(monitor => {
+            if (monitor.dataset.originalColor !== undefined) {
+                monitor.style.color = monitor.dataset.originalColor;
+                delete monitor.dataset.originalColor;
+            }
+            if (monitor.dataset.originalBorder !== undefined) {
+                monitor.style.border = monitor.dataset.originalBorder;
+                delete monitor.dataset.originalBorder;
+            }
+            if (monitor.dataset.originalBoxShadow !== undefined) {
+                monitor.style.boxShadow = monitor.dataset.originalBoxShadow;
+                delete monitor.dataset.originalBoxShadow;
+            }
+            monitor.style.backgroundColor = '';
+            monitor.style.fontWeight = '';
+        });
+        
+        allRoomNames.forEach(roomName => {
+            if (roomName.dataset.originalStyle !== undefined) {
+                roomName.setAttribute('style', roomName.dataset.originalStyle);
+                delete roomName.dataset.originalStyle;
+            }
+        });
+        
+        allLocationNames.forEach(name => {
+            if (name.dataset.originalStyle !== undefined) {
+                name.setAttribute('style', name.dataset.originalStyle);
+                delete name.dataset.originalStyle;
+            }
+        });
+        
+        allSectionLabels.forEach(label => {
+            if (label.dataset.originalStyle !== undefined) {
+                label.setAttribute('style', label.dataset.originalStyle);
+                delete label.dataset.originalStyle;
+            }
+        });
+        
+        // 모든 층에 동일한 스케일 적용 (용지 방향 고려 불필요, contentWidth/Height로 계산됨)
         const optimalScale = calcPdfScale(sectionDimensions, contentWidth, contentHeight);
-        addImagesToPdf(pdf, capturedCanvases, sectionDimensions, optimalScale, { margin, contentWidth, pageHeight, sectionGap });
+        
+        // 콘솔에 디버그 정보 출력
+        console.log(`PDF 생성 정보 - 방향: ${isLandscape ? '가로' : '세로'}, 최종 스케일: ${optimalScale.toFixed(3)}`);
+        
+        addImagesToPdf(pdf, capturedCanvases, sectionDimensions, optimalScale, { 
+            margin, contentWidth, pageHeight, sectionGap 
+        });
 
         setOverlayText('PDF 파일 저장 중...');
-        const orientationText = orientation === 'l' ? '가로' : '세로';
+        const orientationText = isLandscape ? '가로' : '세로';
         pdf.save(`부광고등학교_모니터_현황_${orientationText}.pdf`);
 
       } catch (error) {
@@ -709,6 +1160,33 @@
       });
       window.addEventListener('resize', () => debounce(scaleLayout, 250));
       loadAndRenderAllData();
+    }
+
+    // 모니터 상태 색상 추출 함수
+    function getStatusColors() {
+      const style = getComputedStyle(document.documentElement);
+      return {
+        green: {
+          bg: style.getPropertyValue('--color-status-green-bg').trim(),
+          text: style.getPropertyValue('--color-status-green-text').trim()
+        },
+        red: {
+          bg: style.getPropertyValue('--color-status-red-bg').trim(),
+          text: style.getPropertyValue('--color-status-red-text').trim()
+        },
+        yellow: {
+          bg: style.getPropertyValue('--color-status-yellow-bg').trim(),
+          text: style.getPropertyValue('--color-status-yellow-text').trim()
+        },
+        blue: {
+          bg: style.getPropertyValue('--color-status-blue-bg').trim(),
+          text: style.getPropertyValue('--color-status-blue-text').trim()
+        },
+        orange: {
+          bg: style.getPropertyValue('--color-status-orange-bg').trim(),
+          text: style.getPropertyValue('--color-status-orange-text').trim()
+        }
+      };
     }
 
     initializeApp();

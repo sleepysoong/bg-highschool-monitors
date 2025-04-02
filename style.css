@@ -25,20 +25,20 @@
   --color-monitor-bg: #E9ECEF;
   --color-monitor-border: #DEE2E6;
   --color-monitor-text: #495057;
-  --color-status-green-bg: #E8F5E9;
-  --color-status-green-border: #C8E6C9;
+  --color-status-green-bg: #C8E6C9;
+  --color-status-green-border: #81C784;
   --color-status-green-text: #1B5E20;
-  --color-status-red-bg: #FFEBEE;
-  --color-status-red-border: #FFCDD2;
+  --color-status-red-bg: #FFCDD2;
+  --color-status-red-border: #E57373;
   --color-status-red-text: #B71C1C;
-  --color-status-yellow-bg: #FFFACD;
-  --color-status-yellow-border: #FFEC8B;
+  --color-status-yellow-bg: #FFF59D;
+  --color-status-yellow-border: #FFE082;
   --color-status-yellow-text: #8B7500;
-  --color-status-blue-bg: #BBDEFB;
-  --color-status-blue-border: #90CAF9;
+  --color-status-blue-bg: #90CAF9;
+  --color-status-blue-border: #64B5F6;
   --color-status-blue-text: #0D47A1;
-  --color-status-orange-bg: #FFE0B2;
-  --color-status-orange-border: #FFCC80;
+  --color-status-orange-bg: #FFCC80;
+  --color-status-orange-border: #FFB74D;
   --color-status-orange-text: #E65100;
   --color-loading-text: #6c757d;
   --color-error-text: #dc3545;
@@ -180,20 +180,38 @@ body {
 .pdf-capture-mode .grid-container,
 .pdf-capture-mode .lost-monitors-grid {
   background-color: var(--color-pdf-section-bg) !important;
-  border-color: var(--color-pdf-grid-border) !important;
-  gap: 2px !important;
-  padding: 2px !important;
+  border: 1px solid var(--color-pdf-grid-border) !important;
+  gap: 3px !important;
+  padding: 4px !important;
   max-width: none !important;
   margin: 0 !important;
-  grid-template-columns: auto !important;
-}
-.pdf-capture-mode .cube {
-  background-color: var(--color-pdf-cube-bg) !important;
-  border: 1px solid var(--color-pdf-grid-border) !important;
+  grid-auto-flow: dense !important;
+  width: auto !important;
+  min-width: 300px !important;
+  visibility: visible !important;
+  display: grid !important;
+  opacity: 1 !important;
 }
 .pdf-capture-mode .corridor {
   background-color: var(--color-pdf-section-bg) !important;
-  border: 1px dashed var(--color-pdf-corridor-border) !important;
+  border: 2px dashed #aaaaaa !important;
+  min-width: 100px !important;
+  min-height: 60px !important;
+  box-sizing: border-box !important;
+  padding: 5px !important;
+  visibility: visible !important;
+  display: flex !important;
+  opacity: 1 !important;
+}
+.pdf-capture-mode .cube {
+  background-color: var(--color-pdf-cube-bg) !important;
+  border: none !important;
+  min-width: 100px !important;
+  min-height: 60px !important;
+  visibility: visible !important;
+  display: flex !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
 }
 .pdf-capture-mode .section-divider { display: none !important; }
 .pdf-capture-mode .section-label {
@@ -205,12 +223,24 @@ body {
 .pdf-capture-mode .icon-button {
   font-family: var(--font-primary) !important;
 }
-.pdf-capture-mode .cube-name-text { font-weight: 700 !important; font-size: 1.2em !important; }
+.pdf-capture-mode .cube-name-text { 
+  font-weight: 700 !important; 
+  font-size: 14px !important; 
+  color: #000000 !important;
+  visibility: visible !important;
+  display: inline-block !important;
+  line-height: 1.4 !important;
+  text-align: center !important;
+  opacity: 1 !important;
+  text-shadow: 0px 0px 1px #ffffff !important;
+}
 .pdf-capture-mode .cube,
 .pdf-capture-mode .monitor-cube { letter-spacing: -0.05em !important; }
 .pdf-capture-mode .lost-location-cube {
   background-color: var(--color-pdf-lost-cube-bg) !important;
   border: 1px solid var(--color-pdf-lost-cube-border) !important;
+  min-width: 100px !important;
+  padding: 5px !important;
 }
 
 .section-label {
@@ -376,8 +406,131 @@ body {
 .pdf-capture-mode .lost-monitor-list {
   display: grid !important;
   gap: 2px !important;
+  padding-top: 4px !important;
+  width: 100% !important;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important;
 }
 
 .pdf-capture-mode .monitor-cube {
-  min-height: 22px !important;
+  min-height: 24px !important;
+  min-width: 85px !important;
+  padding: 4px 2px !important;
+  font-size: 11px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-weight: bold !important;
+  color: #000000 !important;
+  visibility: visible !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  opacity: 1 !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* 캡처 준비 상태를 위한 스타일 */
+.capture-ready .corridor {
+  border: 3px dashed #777777 !important;
+  background-color: #f8f8f8 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  min-width: 100px !important;
+  min-height: 60px !important;
+}
+
+.capture-ready .cube:not(.corridor) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  min-width: 100px !important;
+  min-height: 60px !important;
+}
+
+.capture-ready .grid-container,
+.capture-ready .lost-monitors-grid {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: grid !important;
+  min-width: 300px !important;
+  background-color: #ffffff !important;
+}
+
+/* 캡처 시 폰트 강제 지정 */
+.pdf-capture-mode * {
+  font-family: 'goorm-sans-bold', Arial, sans-serif !important;
+}
+
+.pdf-capture-mode .section-label {
+  font-family: 'Freesentation-9Black', Arial, sans-serif !important;
+}
+
+/* 캡처 모드에서 교실 명칭 텍스트 강조 */
+.pdf-capture-mode .lost-location-name {
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  color: #000000 !important;
+  visibility: visible !important;
+  display: block !important;
+  opacity: 1 !important;
+  text-align: center !important;
+}
+
+/* 상태 표시 색상이 PDF에서도 보이도록 강화 - 테두리 제거 */
+.pdf-capture-mode .monitor-cube.status-green { 
+  background-color: var(--color-status-green-bg) !important; 
+  border: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: var(--color-status-green-text) !important; 
+}
+.pdf-capture-mode .monitor-cube.status-red { 
+  background-color: var(--color-status-red-bg) !important; 
+  border: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: var(--color-status-red-text) !important; 
+}
+.pdf-capture-mode .monitor-cube.status-yellow { 
+  background-color: var(--color-status-yellow-bg) !important; 
+  border: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: var(--color-status-yellow-text) !important; 
+}
+.pdf-capture-mode .monitor-cube.status-blue { 
+  background-color: var(--color-status-blue-bg) !important; 
+  border: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: var(--color-status-blue-text) !important; 
+}
+.pdf-capture-mode .monitor-cube.status-orange { 
+  background-color: var(--color-status-orange-bg) !important; 
+  border: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: var(--color-status-orange-text) !important; 
 }
